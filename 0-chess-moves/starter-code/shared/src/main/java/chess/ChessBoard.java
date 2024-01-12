@@ -1,7 +1,5 @@
 package chess;
 
-import org.junit.jupiter.api.DisplayNameGenerator;
-
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -23,8 +21,8 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow()][position.getColumn()] = piece;
-        System.out.println("Orion tries to add a piece");
-        System.out.printf("It's %s at position %s%n", piece, position);
+//        System.out.println("Orion tries to add a piece");
+//        System.out.printf("It's %s at position %s%n", piece, position);
     }
 
     /**

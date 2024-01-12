@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Represents a single chess piece
@@ -46,6 +43,24 @@ public class ChessPiece {
         return this.type;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
+
+    @Override
+    public String toString() {
+        return pieceColor + " " + type;
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -60,6 +75,10 @@ public class ChessPiece {
         HashSet<ChessMove> legalMoves = new HashSet<>();
         switch (this.type) {
             case KING -> {
+
+//TODO: Have each piece generate the available moves, then have the same function run with those available moves
+                //TODO: Use slightly different functions for King and Pawn
+
 //                List<Integer> availableHMoves = Arrays.asList(-1, 0, 1, -1, 1, -1, 0, 1);
 //                List<Integer> availableVMoves = Arrays.asList(1, 1, 1, 0, 0, -1, -1, -1);
 //
@@ -72,14 +91,14 @@ public class ChessPiece {
 //                }
 //
                 List<List<Integer>> availableMoves = Arrays.asList(
-                        Arrays.asList(-1, 1),
                         Arrays.asList(0, 1),
                         Arrays.asList(1, 1),
                         Arrays.asList(-1, 0),
                         Arrays.asList(1, 0),
                         Arrays.asList(-1, -1),
                         Arrays.asList(0, -1),
-                        Arrays.asList(1, -1)
+                        Arrays.asList(1, -1),
+                        Arrays.asList(-1, 1)
                 );
 
                 System.out.println("Orion is trying to print moves");
@@ -87,14 +106,33 @@ public class ChessPiece {
                     int H = move.get(0);
                     int V = move.get(1);
 
-                    System.out.println(H + ", " + V);
+//                    System.out.println(H + ", " + V);
 
                     int newRow = myPosition.getRow() + H;
                     int newColumn = myPosition.getColumn() + V;
 
+
+                    ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+                    // Check if in bounds
                     if (isInBounds(newRow) && isInBounds(newColumn)) {
-                        ChessPosition newPosition = new ChessPosition(newRow,newColumn);
-                        legalMoves.add(new ChessMove(myPosition,newPosition, null));
+                        ChessPiece blockingPiece = pieceIsThere(board, newPosition);
+
+                        // Check if a piece is blocking
+                        if (blockingPiece == null) {
+                            // No piece blocking
+                            System.out.println("No piece blocking so you're free to move to "+newPosition);
+                            legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                        } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
+                            // Same team is blocking
+                            System.out.println("Your own team ("+this.getTeamColor()+") is blocking that! "+newPosition);
+                        } else {
+                            // Enemy team is blocking (and can be taken)
+                            System.out.println("You can take a "+blockingPiece.getPieceType()+" at "+newPosition);
+                            legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                        }
+
+                    } else {
+                        System.out.println("It's out of bounds");
                     }
                 }
 //TODO: Implement this
@@ -124,7 +162,7 @@ public class ChessPiece {
                 throw new RuntimeException("Piece type is not recognized");
             }
         }
-        
+
         System.out.println("Legal Moves include");
         System.out.print(legalMoves);
         return legalMoves;
@@ -136,6 +174,19 @@ public class ChessPiece {
     private boolean isInBounds(int finalDestination) {
         return finalDestination >= 0 && finalDestination <= 7;
     }
+
+    private ChessPiece pieceIsThere(ChessBoard board, ChessPosition position) {
+        ChessPiece blockingPiece = (ChessPiece) board.getPiece(position);
+//
+//        if (blockingPiece == null) {
+//            System.out.println("Nothing blocking this");
+//        } else {
+//            System.out.println(blockingPiece+" is blocking "+position);
+//        }
+        return blockingPiece;
+    }
+
 }
+
 
 
