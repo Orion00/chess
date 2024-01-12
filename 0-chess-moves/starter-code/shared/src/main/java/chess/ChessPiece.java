@@ -60,17 +60,43 @@ public class ChessPiece {
         HashSet<ChessMove> legalMoves = new HashSet<>();
         switch (this.type) {
             case KING -> {
-                List<Integer> availableHMoves = Arrays.asList(-1, 0, 1, -1, 1, -1, 0, 1);
-                List<Integer> availableVMoves = Arrays.asList(1, 1, 1, 0, 0, -1, -1, -1);
+//                List<Integer> availableHMoves = Arrays.asList(-1, 0, 1, -1, 1, -1, 0, 1);
+//                List<Integer> availableVMoves = Arrays.asList(1, 1, 1, 0, 0, -1, -1, -1);
+//
+//                System.out.println("Orion is trying to print moves");
+//                for (Integer,Integer H,V : availableHMoves,availableVMoves) {
+//                    System.out.println(H,V);
+//                    if (isInBounds(myPosition.getRow()+H) && isInBounds(myPosition.getColumn())+V) {
+//                        legalMoves.add(ChessPosition(H,V));
+//                    }
+//                }
+//
+                List<List<Integer>> availableMoves = Arrays.asList(
+                        Arrays.asList(-1, 1),
+                        Arrays.asList(0, 1),
+                        Arrays.asList(1, 1),
+                        Arrays.asList(-1, 0),
+                        Arrays.asList(1, 0),
+                        Arrays.asList(-1, -1),
+                        Arrays.asList(0, -1),
+                        Arrays.asList(1, -1)
+                );
 
                 System.out.println("Orion is trying to print moves");
-                for (Integer,Integer H,V : availableHMoves,availableVMoves) {
-                    System.out.println(H,V);
-                    if (isInBounds(myPosition.getRow()+H) && isInBounds(myPosition.getColumn())+V) {
-                        legalMoves.add(ChessPosition(H,V));
+                for (List<Integer> move : availableMoves) {
+                    int H = move.get(0);
+                    int V = move.get(1);
+
+                    System.out.println(H + ", " + V);
+
+                    int newRow = myPosition.getRow() + H;
+                    int newColumn = myPosition.getColumn() + V;
+
+                    if (isInBounds(newRow) && isInBounds(newColumn)) {
+                        ChessPosition newPosition = new ChessPosition(newRow,newColumn);
+                        legalMoves.add(new ChessMove(myPosition,newPosition, null));
                     }
                 }
-//                legalMoves.add();
 //TODO: Implement this
                 break;
             }
@@ -99,7 +125,8 @@ public class ChessPiece {
             }
         }
         
-
+        System.out.println("Legal Moves include");
+        System.out.print(legalMoves);
         return legalMoves;
     }
 
