@@ -78,18 +78,6 @@ public class ChessPiece {
 
 //TODO: Have each piece generate the available moves, then have the same function run with those available moves
                 //TODO: Use slightly different functions for King and Pawn
-
-//                List<Integer> availableHMoves = Arrays.asList(-1, 0, 1, -1, 1, -1, 0, 1);
-//                List<Integer> availableVMoves = Arrays.asList(1, 1, 1, 0, 0, -1, -1, -1);
-//
-//                System.out.println("Orion is trying to print moves");
-//                for (Integer,Integer H,V : availableHMoves,availableVMoves) {
-//                    System.out.println(H,V);
-//                    if (isInBounds(myPosition.getRow()+H) && isInBounds(myPosition.getColumn())+V) {
-//                        legalMoves.add(ChessPosition(H,V));
-//                    }
-//                }
-//
                 List<List<Integer>> availableMoves = Arrays.asList(
                         Arrays.asList(0, 1),
                         Arrays.asList(1, 1),
@@ -102,40 +90,8 @@ public class ChessPiece {
                 );
 
                 System.out.println("Orion is trying to print moves");
-                for (List<Integer> move : availableMoves) {
-                    int H = move.get(0);
-                    int V = move.get(1);
 
-//                    System.out.println(H + ", " + V);
-
-                    int newRow = myPosition.getRow() + H;
-                    int newColumn = myPosition.getColumn() + V;
-
-
-                    ChessPosition newPosition = new ChessPosition(newRow, newColumn);
-                    // Check if in bounds
-                    if (isInBounds(newRow) && isInBounds(newColumn)) {
-                        ChessPiece blockingPiece = pieceIsThere(board, newPosition);
-
-                        // Check if a piece is blocking
-                        if (blockingPiece == null) {
-                            // No piece blocking
-                            System.out.println("No piece blocking so you're free to move to "+newPosition);
-                            legalMoves.add(new ChessMove(myPosition, newPosition, null));
-                        } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
-                            // Same team is blocking
-                            System.out.println("Your own team ("+this.getTeamColor()+") is blocking that! "+newPosition);
-                        } else {
-                            // Enemy team is blocking (and can be taken)
-                            System.out.println("You can take a "+blockingPiece.getPieceType()+" at "+newPosition);
-                            legalMoves.add(new ChessMove(myPosition, newPosition, null));
-                        }
-
-                    } else {
-                        System.out.println("It's out of bounds");
-                    }
-                }
-//TODO: Implement this
+                legalMoves.addAll(legalAndBlocked(board,myPosition,availableMoves));
                 break;
             }
             case QUEEN -> {
@@ -144,6 +100,59 @@ public class ChessPiece {
             }
             case BISHOP -> {
                 //TODO: Implement this
+                int startingRow = myPosition.getRow();
+                int startingColumn = myPosition.getColumn();
+
+                List<List<Integer>> availableMoves;
+                System.out.println("We're starting at "+startingRow+","+startingColumn);
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,-1));
+
+//                for (int r = startingRow + 1, c = startingColumn + 1; r < 8 && c < 8; r++, c++) {
+////                    if (board.hasPieceAt(r, c)) {
+////                        // Break if a piece is encountered
+////                        break;
+////                    }
+//                    System.out.println(r + " row and " + c + " column");
+//                }
+//                System.out.println();
+//                for (int r = startingRow + 1, c = startingColumn - 1; r < 8 && c > -1; r++, c--) {
+////                    if (board.hasPieceAt(r, c)) {
+////                        // Break if a piece is encountered
+////                        break;
+////                    }
+//                    System.out.println(r + " row and " + c + " column");
+//                }
+//                System.out.println();
+//                for (int r = startingRow - 1, c = startingColumn + 1; r > -1 && c < 8; r++, c++) {
+//                    System.out.println(r + " row and " + c + " column");
+//                    legalMoves.addAll(keepMoving(board, r, c));
+//
+//
+//                }
+//                System.out.println();
+//                for (int r = startingRow - 1, c = startingColumn - 1; r > -1 && c > -1; r--, c--) {
+////                    if (board.hasPieceAt(r, c)) {
+////                        // Break if a piece is encountered
+////                        break;
+////                    }
+//                    System.out.println(r + " row and " + c + " column");
+//                }
+
+
+//                availableMoves = Arrays.asList(
+//                        Arrays.asList(0, 1),
+//                        Arrays.asList(1, 1),
+//                        Arrays.asList(-1, 0),
+//                        Arrays.asList(1, 0),
+//                        Arrays.asList(-1, -1),
+//                        Arrays.asList(0, -1),
+//                        Arrays.asList(1, -1),
+//                        Arrays.asList(-1, 1)
+//                );
+//                legalMoves.addAll(legalAndBlocked(board,myPosition,availableMoves));
                 break;
             }
             case KNIGHT -> {
@@ -152,6 +161,24 @@ public class ChessPiece {
             }
             case ROOK -> {
                 //TODO: Implement this
+                List<List<Integer>> availableMoves;
+                for (int r = 0; r < 8; r++) {
+                    for (int c= 0; c < 8; c++) {
+                        System.out.println(r+" row and "+c+" column");
+                    }
+                }
+
+                availableMoves = Arrays.asList(
+                        Arrays.asList(0, 1),
+                        Arrays.asList(1, 1),
+                        Arrays.asList(-1, 0),
+                        Arrays.asList(1, 0),
+                        Arrays.asList(-1, -1),
+                        Arrays.asList(0, -1),
+                        Arrays.asList(1, -1),
+                        Arrays.asList(-1, 1)
+                );
+                legalMoves.addAll(legalAndBlocked(board,myPosition,availableMoves));
                 break;
             }
             case PAWN -> {
@@ -176,7 +203,7 @@ public class ChessPiece {
     }
 
     private ChessPiece pieceIsThere(ChessBoard board, ChessPosition position) {
-        ChessPiece blockingPiece = (ChessPiece) board.getPiece(position);
+        ChessPiece blockingPiece = board.getPiece(position);
 //
 //        if (blockingPiece == null) {
 //            System.out.println("Nothing blocking this");
@@ -186,7 +213,95 @@ public class ChessPiece {
         return blockingPiece;
     }
 
-}
+    private HashSet<ChessMove> legalAndBlocked(ChessBoard board, ChessPosition myPosition, List<List<Integer>> availableMoves) {
+        HashSet<ChessMove> legalMoves = new HashSet<>();
+        for (List<Integer> move : availableMoves) {
+            int H = move.get(0);
+            int V = move.get(1);
 
+            int newRow = myPosition.getRow() + H;
+            int newColumn = myPosition.getColumn() + V;
+
+            ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+            // Check if in bounds
+            if (isInBounds(newRow) && isInBounds(newColumn)) {
+                ChessPiece blockingPiece = pieceIsThere(board, newPosition);
+
+                // Check if a piece is blocking
+                if (blockingPiece == null) {
+                    // No piece blocking
+                    System.out.println("No piece blocking so you're free to move to " + newPosition);
+                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
+                    // Same team is blocking
+                    System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
+                } else {
+                    // Enemy team is blocking (and can be taken)
+                    System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                }
+
+            } else {
+                System.out.println("It's out of bounds");
+            }
+        }
+        return legalMoves;
+    }
+
+//    private HashSet<ChessMove> keepMoving(ChessBoard board,int r,int c) {
+//        HashSet<ChessMove> legalMoves = null;
+//        ChessPosition newPosition = new ChessPosition(r,c);
+//        ChessPiece blockingPiece = pieceIsThere(board, newPosition);
+//
+//        // Check if a piece is blocking
+//        if (blockingPiece == null) {
+//            // No piece blocking
+//            System.out.println("No piece blocking so you're free to move to " + newPosition);
+//            legalMoves.add(new ChessMove(myPosition, newPosition, null));
+//        } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
+//            // Same team is blocking
+//            System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
+//            break;
+//        } else {
+//            // Enemy team is blocking (and can be taken)
+//            System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+//            legalMoves.add(new ChessMove(myPosition, newPosition, null));
+//            break;
+//        }
+//        return legalMoves;
+//    }
+
+    private HashSet<ChessMove> recurKeepMoving(ChessBoard board, ChessPosition startPosition, ChessPosition currentPosition, int r,int c) {
+        HashSet<ChessMove> legalMoves = new HashSet<>();
+        System.out.println("Trying to move to " + (currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c));
+
+        // Checks we're not off the gameboard
+        if (currentPosition.getRow()+r > 7 || currentPosition.getRow()+r < 0 || currentPosition.getColumn()+c > 7 || currentPosition.getColumn()+c < 0) {
+            System.out.println((currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c) +" is an illegal move off the board. Stopping recursion.");
+            return legalMoves;
+        }
+
+        ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+r, currentPosition.getColumn()+c);
+        ChessPiece blockingPiece = board.getPiece(newPosition);
+
+
+        // Check if a piece is blocking
+        if (blockingPiece == null) {
+            // No piece blocking, track the legal move and
+            System.out.println("No piece blocking so you're free to move to " + newPosition);
+            legalMoves.add(new ChessMove(startPosition, newPosition, null));
+            legalMoves.addAll(recurKeepMoving(board,startPosition,newPosition,r,c));
+        } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
+            // Same team is blocking
+            System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
+        } else {
+            // Enemy team is blocking (and can be taken)
+            System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+            legalMoves.add(new ChessMove(startPosition, newPosition, null));
+        }
+        return legalMoves;
+    }
+
+}
 
 
