@@ -73,6 +73,8 @@ public class ChessPiece {
 //        Check if moving goes less than 0 or greater than 7
 //        Add 1 to everything since the moves seem to not be 0 based
         HashSet<ChessMove> legalMoves = new HashSet<>();
+        System.out.println("We're starting at "+myPosition.getRow()+","+myPosition.getColumn());
+
         switch (this.type) {
             case KING -> {
 
@@ -96,20 +98,19 @@ public class ChessPiece {
             }
             case QUEEN -> {
                 //TODO: Implement this
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,-1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,0,1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,0,-1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,0));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,0));
                 break;
             }
             case BISHOP -> {
                 //TODO: Implement this
-                int startingRow = myPosition.getRow();
-                int startingColumn = myPosition.getColumn();
 
-//                List<List<Integer>> availableMoves;
-                ChessPosition zeroBasedStart = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()-1);
-                System.out.println("We're starting at "+startingRow+","+startingColumn);
-//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,1,1));
-//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,-1,1));
-//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,1,-1));
-//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,-1,-1));
 
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
@@ -167,24 +168,29 @@ public class ChessPiece {
             }
             case ROOK -> {
                 //TODO: Implement this
-                List<List<Integer>> availableMoves;
-                for (int r = 0; r < 8; r++) {
-                    for (int c= 0; c < 8; c++) {
-                        System.out.println(r+" row and "+c+" column");
-                    }
-                }
+//                List<List<Integer>> availableMoves;
+//                for (int r = 0; r < 8; r++) {
+//                    for (int c= 0; c < 8; c++) {
+//                        System.out.println(r+" row and "+c+" column");
+//                    }
+//                }
+//
+//                availableMoves = Arrays.asList(
+//                        Arrays.asList(0, 1),
+//                        Arrays.asList(1, 1),
+//                        Arrays.asList(-1, 0),
+//                        Arrays.asList(1, 0),
+//                        Arrays.asList(-1, -1),
+//                        Arrays.asList(0, -1),
+//                        Arrays.asList(1, -1),
+//                        Arrays.asList(-1, 1)
+//                );
+//                legalMoves.addAll(legalAndBlocked(board,myPosition,availableMoves));
 
-                availableMoves = Arrays.asList(
-                        Arrays.asList(0, 1),
-                        Arrays.asList(1, 1),
-                        Arrays.asList(-1, 0),
-                        Arrays.asList(1, 0),
-                        Arrays.asList(-1, -1),
-                        Arrays.asList(0, -1),
-                        Arrays.asList(1, -1),
-                        Arrays.asList(-1, 1)
-                );
-                legalMoves.addAll(legalAndBlocked(board,myPosition,availableMoves));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,0,1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,0,-1));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,0));
+                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,0));
                 break;
             }
             case PAWN -> {
@@ -281,25 +287,19 @@ public class ChessPiece {
         HashSet<ChessMove> legalMoves = new HashSet<>();
 //        System.out.println("Trying to move to " + (currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c));
 
-        // Checks we're not off the gameboard
+        // Checks we're not off the game board
         if (currentPosition.getRow()+r > 8 || currentPosition.getRow()+r < 1 || currentPosition.getColumn()+c > 8 || currentPosition.getColumn()+c < 1) {
 //            System.out.println((currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c) +" is an illegal move off the board. Stopping recursion.");
             return legalMoves;
         }
 
-        ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+r, currentPosition.getColumn()+c);
+            ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+r, currentPosition.getColumn()+c);
+            ChessPiece blockingPiece = board.getPiece(newPosition);
 
-
-        ChessPiece blockingPiece = board.getPiece(newPosition);
-
-
-        // Check if a piece is blocking
+            // Check if a piece is blocking
         if (blockingPiece == null) {
             // No piece blocking, track the legal move and call function again
             System.out.println("No piece blocking so you're free to move to " + newPosition);
-//            ChessPosition notZeroBasedStart = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()+1);
-//            ChessPosition notZeroBasedNewPos = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn()+1);
-
             legalMoves.add(new ChessMove(startPosition, newPosition, null));
             legalMoves.addAll(recurKeepMoving(board,startPosition,newPosition,r,c));
         } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
@@ -308,10 +308,6 @@ public class ChessPiece {
         } else {
             // Enemy team is blocking (and can be taken)
             System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
-
-//            ChessPosition notZeroBasedStart = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()+1);
-//            ChessPosition notZeroBasedNewPos = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn()+1);
-
             legalMoves.add(new ChessMove(startPosition, newPosition, null));
         }
         return legalMoves;
