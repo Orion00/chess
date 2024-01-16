@@ -103,8 +103,14 @@ public class ChessPiece {
                 int startingRow = myPosition.getRow();
                 int startingColumn = myPosition.getColumn();
 
-                List<List<Integer>> availableMoves;
+//                List<List<Integer>> availableMoves;
+                ChessPosition zeroBasedStart = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()-1);
                 System.out.println("We're starting at "+startingRow+","+startingColumn);
+//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,1,1));
+//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,-1,1));
+//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,1,-1));
+//                legalMoves.addAll(recurKeepMoving(board,myPosition,zeroBasedStart,-1,-1));
+
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
@@ -273,22 +279,27 @@ public class ChessPiece {
 
     private HashSet<ChessMove> recurKeepMoving(ChessBoard board, ChessPosition startPosition, ChessPosition currentPosition, int r,int c) {
         HashSet<ChessMove> legalMoves = new HashSet<>();
-        System.out.println("Trying to move to " + (currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c));
+//        System.out.println("Trying to move to " + (currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c));
 
         // Checks we're not off the gameboard
-        if (currentPosition.getRow()+r > 7 || currentPosition.getRow()+r < 0 || currentPosition.getColumn()+c > 7 || currentPosition.getColumn()+c < 0) {
-            System.out.println((currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c) +" is an illegal move off the board. Stopping recursion.");
+        if (currentPosition.getRow()+r > 8 || currentPosition.getRow()+r < 1 || currentPosition.getColumn()+c > 8 || currentPosition.getColumn()+c < 1) {
+//            System.out.println((currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c) +" is an illegal move off the board. Stopping recursion.");
             return legalMoves;
         }
 
         ChessPosition newPosition = new ChessPosition(currentPosition.getRow()+r, currentPosition.getColumn()+c);
+
+
         ChessPiece blockingPiece = board.getPiece(newPosition);
 
 
         // Check if a piece is blocking
         if (blockingPiece == null) {
-            // No piece blocking, track the legal move and
+            // No piece blocking, track the legal move and call function again
             System.out.println("No piece blocking so you're free to move to " + newPosition);
+//            ChessPosition notZeroBasedStart = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()+1);
+//            ChessPosition notZeroBasedNewPos = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn()+1);
+
             legalMoves.add(new ChessMove(startPosition, newPosition, null));
             legalMoves.addAll(recurKeepMoving(board,startPosition,newPosition,r,c));
         } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
@@ -297,6 +308,10 @@ public class ChessPiece {
         } else {
             // Enemy team is blocking (and can be taken)
             System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+
+//            ChessPosition notZeroBasedStart = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()+1);
+//            ChessPosition notZeroBasedNewPos = new ChessPosition(newPosition.getRow()+1, newPosition.getColumn()+1);
+
             legalMoves.add(new ChessMove(startPosition, newPosition, null));
         }
         return legalMoves;
@@ -305,3 +320,11 @@ public class ChessPiece {
 }
 
 
+//        | | |x| | | |x| |
+//        | | | |x| |x| | |
+//        | | | | |b| | | |
+//        | | | |x| |x| | |
+//        | | |x| | | |x| |
+//        | |x| | | | | |x|
+//        |x| | | | | | | |
+//        | | | | | | | | |
