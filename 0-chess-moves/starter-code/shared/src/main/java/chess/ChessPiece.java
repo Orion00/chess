@@ -149,14 +149,16 @@ public class ChessPiece {
                         Arrays.asList(verticalMovement,1)
                 ));
 
-                if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE) {
-                    availableMoves.add(Arrays.asList(verticalMovement*2, 0));
-                } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK) {
-                    availableMoves.add(Arrays.asList(verticalMovement*2, 0));
-                }
-
                 for (List<Integer> move : availableMoves) {
                     legalMoves.addAll(pawnMove(board, myPosition,move));
+                }
+
+                if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE
+                        && legalMoves.contains(new ChessMove(myPosition, new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()),null))) {
+                    legalMoves.addAll(pawnMove(board, myPosition,Arrays.asList(verticalMovement*2,0)));
+                } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK
+                        && legalMoves.contains(new ChessMove(myPosition, new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()),null))) {
+                    legalMoves.addAll(pawnMove(board, myPosition,Arrays.asList(verticalMovement*2,0)));
                 }
                 break;
             }
@@ -181,41 +183,6 @@ public class ChessPiece {
         ChessPiece blockingPiece = board.getPiece(position);
         return blockingPiece;
     }
-
-//    private HashSet<ChessMove> legalAndBlocked(ChessBoard board, ChessPosition myPosition, List<List<Integer>> availablePositions) {
-//        HashSet<ChessMove> legalMoves = new HashSet<>();
-//        for (List<Integer> position : availablePositions) {
-//            int horizontalIncrease = position.get(0);
-//            int verticalIncrease = position.get(1);
-//
-//            int newRow = myPosition.getRow() + horizontalIncrease;
-//            int newColumn = myPosition.getColumn() + verticalIncrease;
-//
-//            ChessPosition newPosition = new ChessPosition(newRow, newColumn);
-//            // Check if in bounds
-//            if (isInBounds(newRow) && isInBounds(newColumn)) {
-//                ChessPiece blockingPiece = pieceIsThere(board, newPosition);
-//
-//                // Check if a piece is blocking
-//                if (blockingPiece == null) {
-//                    // No piece blocking
-//                    System.out.println("No piece blocking so you're free to move to " + newPosition);
-//                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
-//                } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
-//                    // Same team is blocking
-//                    System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
-//                } else {
-//                    // Enemy team is blocking (and can be taken)
-//                    System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
-//                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
-//                }
-//
-//            } else {
-//                System.out.println("It's out of bounds");
-//            }
-//        }
-//        return legalMoves;
-//    }
 
     private HashSet<ChessMove> pawnMove(ChessBoard board,ChessPosition myPosition,List<Integer> move) {
         HashSet<ChessMove> legalMoves = new HashSet<>();
@@ -244,6 +211,13 @@ public class ChessPiece {
                         // No Promotion
                         legalMoves.add(new ChessMove(myPosition, newPosition, null));
                     }
+
+                    // Move twice for the first move
+//                    if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE) {
+//                        legalMoves.addAll(pawnMove(board, myPosition, Arrays.asList(2, 0)));
+//                    } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK) {
+//                        legalMoves.addAll(pawnMove(board, myPosition, Arrays.asList(-2, 0)));
+//                    }
                 } else {
                     System.out.println("But you can't move sideways without violence");
                 }
