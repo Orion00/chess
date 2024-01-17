@@ -2,6 +2,8 @@ package chess;
 
 import java.util.*;
 
+import static java.lang.Math.abs;
+
 /**
  * Represents a single chess piece
  * <p>
@@ -231,17 +233,37 @@ public class ChessPiece {
                 System.out.println("No piece blocking.");
                 if (horizontalIncrease == 0) {
                     System.out.println("so you're free to move to " + newPosition);
-                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                    if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
+                        // Promotion
+                        System.out.println("And get promoted!");
+                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                    } else {
+                        // No Promotion
+                        legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                    }
                 } else {
                     System.out.println("But you can't move sideways without violence");
                 }
             } else if (blockingPiece.getTeamColor() == this.getTeamColor() && horizontalIncrease == 0) {
                 // Same team is blocking
                 System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
-            } else if (blockingPiece.getTeamColor() != this.getTeamColor() && horizontalIncrease == 1) {
+            } else if (blockingPiece.getTeamColor() != this.getTeamColor() && abs(horizontalIncrease) == 1) {
                 // Enemy team is blocking (and can be taken)
                 System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
-                legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
+                    // Promotion
+                    System.out.println("And get promoted!");
+                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+                } else {
+                    // No Promotion
+                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                }
             } else {
                 System.out.println("A pawn can't move that that!");
             }
