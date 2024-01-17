@@ -77,9 +77,6 @@ public class ChessPiece {
 
         switch (this.type) {
             case KING -> {
-
-//TODO: Have each piece generate the available moves, then have the same function run with those available moves
-                //TODO: Use slightly different functions for King and Pawn
                 List<List<Integer>> availableMoves = Arrays.asList(
                         Arrays.asList(0, 1),
                         Arrays.asList(1, 1),
@@ -140,7 +137,25 @@ public class ChessPiece {
                 break;
             }
             case PAWN -> {
-                //TODO: Implement this
+                int verticalMovement = 1;
+                if (this.pieceColor == ChessGame.TeamColor.BLACK) {
+                    verticalMovement = -1;
+                }
+                List<List<Integer>> availableMoves = new ArrayList<>(Arrays.asList(
+                        Arrays.asList(verticalMovement,0),
+                        Arrays.asList(verticalMovement,-1),
+                        Arrays.asList(verticalMovement,1)
+                ));
+
+                if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE) {
+                    availableMoves.add(Arrays.asList(verticalMovement*2, 0));
+                } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK) {
+                    availableMoves.add(Arrays.asList(verticalMovement*2, 0));
+                }
+
+                for (List<Integer> move : availableMoves) {
+                    legalMoves.addAll(pawnMove(board, myPosition,move));
+                }
                 break;
             }
             default -> {
@@ -165,38 +180,75 @@ public class ChessPiece {
         return blockingPiece;
     }
 
-    private HashSet<ChessMove> legalAndBlocked(ChessBoard board, ChessPosition myPosition, List<List<Integer>> availablePositions) {
+//    private HashSet<ChessMove> legalAndBlocked(ChessBoard board, ChessPosition myPosition, List<List<Integer>> availablePositions) {
+//        HashSet<ChessMove> legalMoves = new HashSet<>();
+//        for (List<Integer> position : availablePositions) {
+//            int horizontalIncrease = position.get(0);
+//            int verticalIncrease = position.get(1);
+//
+//            int newRow = myPosition.getRow() + horizontalIncrease;
+//            int newColumn = myPosition.getColumn() + verticalIncrease;
+//
+//            ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+//            // Check if in bounds
+//            if (isInBounds(newRow) && isInBounds(newColumn)) {
+//                ChessPiece blockingPiece = pieceIsThere(board, newPosition);
+//
+//                // Check if a piece is blocking
+//                if (blockingPiece == null) {
+//                    // No piece blocking
+//                    System.out.println("No piece blocking so you're free to move to " + newPosition);
+//                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+//                } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
+//                    // Same team is blocking
+//                    System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
+//                } else {
+//                    // Enemy team is blocking (and can be taken)
+//                    System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+//                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+//                }
+//
+//            } else {
+//                System.out.println("It's out of bounds");
+//            }
+//        }
+//        return legalMoves;
+//    }
+
+    private HashSet<ChessMove> pawnMove(ChessBoard board,ChessPosition myPosition,List<Integer> move) {
         HashSet<ChessMove> legalMoves = new HashSet<>();
-        for (List<Integer> position : availablePositions) {
-            int horizontalIncrease = position.get(0);
-            int verticalIncrease = position.get(1);
+        int verticalIncrease = move.get(0);
+        int horizontalIncrease = move.get(1);
 
-            int newRow = myPosition.getRow() + horizontalIncrease;
-            int newColumn = myPosition.getColumn() + verticalIncrease;
 
-            ChessPosition newPosition = new ChessPosition(newRow, newColumn);
-            // Check if in bounds
-            if (isInBounds(newRow) && isInBounds(newColumn)) {
-                ChessPiece blockingPiece = pieceIsThere(board, newPosition);
+        ChessPosition newPosition = new ChessPosition(myPosition.getRow() + verticalIncrease, myPosition.getColumn() + horizontalIncrease);
+        if (isInBounds(newPosition.getRow()) && isInBounds(newPosition.getColumn())) {
 
-                // Check if a piece is blocking
-                if (blockingPiece == null) {
-                    // No piece blocking
-                    System.out.println("No piece blocking so you're free to move to " + newPosition);
+            ChessPiece blockingPiece = pieceIsThere(board, newPosition);
+            // Check if a piece is blocking
+            if (blockingPiece == null) {
+                // No piece blocking
+                System.out.println("No piece blocking.");
+                if (horizontalIncrease == 0) {
+                    System.out.println("so you're free to move to " + newPosition);
                     legalMoves.add(new ChessMove(myPosition, newPosition, null));
-                } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
-                    // Same team is blocking
-                    System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
                 } else {
-                    // Enemy team is blocking (and can be taken)
-                    System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
-                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
+                    System.out.println("But you can't move sideways without violence");
                 }
-
+            } else if (blockingPiece.getTeamColor() == this.getTeamColor() && horizontalIncrease == 0) {
+                // Same team is blocking
+                System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
+            } else if (blockingPiece.getTeamColor() != this.getTeamColor() && horizontalIncrease == 1) {
+                // Enemy team is blocking (and can be taken)
+                System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+                legalMoves.add(new ChessMove(myPosition, newPosition, null));
             } else {
-                System.out.println("It's out of bounds");
+                System.out.println("A pawn can't move that that!");
             }
+        } else {
+            System.out.println(newPosition+" is out of bounds.");
         }
+
         return legalMoves;
     }
 
