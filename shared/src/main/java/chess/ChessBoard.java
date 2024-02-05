@@ -1,5 +1,7 @@
 package chess;
 
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Copy;
+
 import java.util.Arrays;
 
 /**
@@ -8,7 +10,7 @@ import java.util.Arrays;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable {
     ChessPiece[][] board = new ChessPiece[8][8];
 
     public ChessBoard() {
@@ -99,5 +101,17 @@ public class ChessBoard {
             startingRow = 8;
             secondRow = 7;
         }
+    }
+
+    @Override
+    public ChessBoard clone() {
+        ChessBoard temp = new ChessBoard();
+
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                temp.addPiece(new ChessPosition(r,c),this.getPiece(new ChessPosition(r,c)));
+            }
+        }
+        return temp;
     }
 }

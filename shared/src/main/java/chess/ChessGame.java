@@ -113,7 +113,6 @@ public class ChessGame {
         } else {
             setTeamTurn(TeamColor.WHITE);
         }
-        System.out.print(board.toString());
 
     }
 
@@ -204,7 +203,7 @@ public class ChessGame {
 
     public void tryAMove(ChessMove move, ChessPiece movingPiece) throws InvalidMoveException {
         ChessBoard tempBoard = new ChessBoard(board);
-
+        ChessBoard t = board.clone();
         board.addPiece(move.getStartPosition(),null);
         board.addPiece(move.getEndPosition(), movingPiece);
 
