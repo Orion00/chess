@@ -1,7 +1,5 @@
 package chess;
 
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Copy;
-
 import java.util.Arrays;
 
 /**
@@ -71,7 +69,7 @@ public class ChessBoard implements Cloneable {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(board);
+        return Arrays.deepHashCode(board);
     }
 
     /**
@@ -105,13 +103,24 @@ public class ChessBoard implements Cloneable {
 
     @Override
     public ChessBoard clone() {
-        ChessBoard temp = new ChessBoard();
+        ChessBoard tempBoard = new ChessBoard();
 
         for (int r = 1; r < 9; r++) {
             for (int c = 1; c < 9; c++) {
-                temp.addPiece(new ChessPosition(r,c),this.getPiece(new ChessPosition(r,c)));
+                ChessPiece tempPiece = this.getPiece(new ChessPosition(r,c));
+                if (tempPiece != null) {
+                    ChessPiece h = new ChessPiece(tempPiece.getTeamColor(),tempPiece.getPieceType());
+                    tempBoard.addPiece(new ChessPosition(r,c), h);
+                }
+
+//
+//                ChessPiece nott = tempBoard.getPiece(new ChessPosition(r,c));
+//                System.out.println("");
             }
         }
-        return temp;
+
+//        for (int i = 0; i < nv.length; i++)
+//            temp[i] = Arrays.copyOf(foo[i], foo[i].length);
+       return tempBoard;
     }
 }

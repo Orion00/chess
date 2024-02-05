@@ -91,6 +91,7 @@ public class ChessGame {
         }
 
         tryAMove(move, piece);
+        promoteIfNeeded(move);
 
         // TODO: Check if King is in Check
 //        ChessBoard tempBoard = new ChessBoard(board);
@@ -137,6 +138,11 @@ public class ChessGame {
             }
         }
 
+        if (myKingPosition == null) {
+            // If myKing's square is null, myKing isn't on the board, so can't be in check
+            return false;
+        }
+
         // Check all pieces of opposing team's legal moves. If position of same color king is in those moves, return true;
         Collection<ChessMove> totalMoves = new HashSet<>();
         for (int r = 1; r < 9; r++) {
@@ -150,9 +156,9 @@ public class ChessGame {
 
         for (ChessMove move : totalMoves) {
             // Check in enemy pieces can move into myKing's square
-            // If myKing's square is null, myKing isn't on the board
-            ChessPosition a = move.getEndPosition();
+            // Already checked if myKing is null
 
+            ChessPosition a = move.getEndPosition();
             if (myKingPosition.equals(move.getEndPosition())) {
                 return true;
             }
@@ -201,8 +207,8 @@ public class ChessGame {
         return board;
     }
 
-    public void tryAMove(ChessMove move, ChessPiece movingPiece) throws InvalidMoveException {
-        ChessBoard tempBoard = new ChessBoard(board);
+    private void tryAMove(ChessMove move, ChessPiece movingPiece) throws InvalidMoveException {
+        ChessBoard tempBoard = board.clone();
         ChessBoard t = board.clone();
         board.addPiece(move.getStartPosition(),null);
         board.addPiece(move.getEndPosition(), movingPiece);
@@ -213,7 +219,21 @@ public class ChessGame {
             throw new InvalidMoveException("That leaves you in check");
         }
         // If not in check, make the move
-
-
     }
+
+    private void promoteIfNeeded(ChessMove move) {
+        ChessPiece piece = board.getPiece(move.getEndPosition());
+
+
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            if (move.getEndPosition().getRow() == 8 && piece.getTeamColor() == TeamColor.WHITE) {
+                // Promote White
+                piece.type = move.getPromotionPiece();
+            } else if (move.getEndPosition().getRow() == 1 && piece.getTeamColor() == TeamColor.BLACK) {
+                // Promote Black
+                piece.type = move.getPromotionPiece();
+            }
+        }
+    }
+
 }
