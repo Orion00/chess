@@ -57,7 +57,32 @@ public class ChessGame {
             // No piece there
             return null;
         }
-        return piece.pieceMoves(board,startPosition);
+
+        Collection<ChessMove> fullMoves = piece.pieceMoves(board,startPosition);
+        Collection<ChessMove> validMoves = new HashSet<>();
+
+
+
+
+
+        for (ChessMove move : fullMoves) {
+            ChessBoard tempBoard = board.clone();
+            try {
+                board.addPiece(move.getStartPosition(), null);
+                board.addPiece(move.getEndPosition(), piece);
+
+                if (isInCheck(piece.getTeamColor())) {
+                    throw new InvalidMoveException("That leaves you in check");
+                }
+                validMoves.add(move);
+            } catch (InvalidMoveException i) {
+//                System.out.println("Can't move there. "+i.getMessage());
+            } finally {
+                setBoard(tempBoard);
+            }
+
+        }
+        return validMoves;
     }
 
     /**
@@ -84,8 +109,21 @@ public class ChessGame {
             throw new InvalidMoveException("It's not your turn");
         }
 
-        tryAMove(move, piece);
-        promoteIfNeeded(move);
+        try {
+            tryAMove(move, piece);
+            promoteIfNeeded(move);
+
+            // Changes turn
+            if (getTeamTurn() == TeamColor.WHITE) {
+                setTeamTurn(TeamColor.BLACK);
+            } else {
+                setTeamTurn(TeamColor.WHITE);
+            }
+        } catch (InvalidMoveException i) {
+            throw new InvalidMoveException(i.getMessage());
+        }
+
+
 
         // TODO: Check if King is in Check
 //        ChessBoard tempBoard = new ChessBoard(board);
@@ -102,12 +140,7 @@ public class ChessGame {
 //        // TODO: Add Pawn Promotion
 //        board.addPiece(move.getEndPosition(), piece);
 
-        // Changes turn
-        if (getTeamTurn() == TeamColor.WHITE) {
-            setTeamTurn(TeamColor.BLACK);
-        } else {
-            setTeamTurn(TeamColor.WHITE);
-        }
+
 
     }
 
