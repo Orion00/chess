@@ -14,9 +14,12 @@ public class ChessPiece {
     ChessGame.TeamColor pieceColor;
     PieceType type;
 
+    boolean hasMoved;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+        hasMoved = false;
     }
 
     /**
@@ -149,10 +152,10 @@ public class ChessPiece {
                     legalMoves.addAll(pawnMove(board, myPosition,move));
                 }
 
-                if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE
+                if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE && !hasMoved
                         && legalMoves.contains(new ChessMove(myPosition, new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()),null))) {
                     legalMoves.addAll(pawnMove(board, myPosition,Arrays.asList(verticalMovement*2,0)));
-                } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK
+                } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK && !hasMoved
                         && legalMoves.contains(new ChessMove(myPosition, new ChessPosition(myPosition.getRow()-1, myPosition.getColumn()),null))) {
                     legalMoves.addAll(pawnMove(board, myPosition,Arrays.asList(verticalMovement*2,0)));
                 }
@@ -301,6 +304,9 @@ public class ChessPiece {
         return legalMoves;
     }
 
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
 }
 
 

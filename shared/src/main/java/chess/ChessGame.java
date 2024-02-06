@@ -61,10 +61,6 @@ public class ChessGame {
         Collection<ChessMove> fullMoves = piece.pieceMoves(board,startPosition);
         Collection<ChessMove> validMoves = new HashSet<>();
 
-
-
-
-
         for (ChessMove move : fullMoves) {
             ChessBoard tempBoard = board.clone();
             try {
@@ -112,6 +108,7 @@ public class ChessGame {
         try {
             tryAMove(move, piece);
             promoteIfNeeded(move);
+            piece.setHasMoved(true);
 
             // Changes turn
             if (getTeamTurn() == TeamColor.WHITE) {
@@ -124,21 +121,6 @@ public class ChessGame {
         }
 
 
-
-        // TODO: Check if King is in Check
-//        ChessBoard tempBoard = new ChessBoard(board);
-//
-//        board.addPiece(move.getStartPosition(),null);
-//        board.addPiece(move.getEndPosition(), piece);
-
-
-
-        // Resets where it was to nothing
-//        board.addPiece(move.getStartPosition(),null);
-//
-//        // TODO: Add if that if it captures to add to captured pieces for the opposing color
-//        // TODO: Add Pawn Promotion
-//        board.addPiece(move.getEndPosition(), piece);
 
 
 
@@ -258,28 +240,6 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-//        // Find all moves that pieces of that team can make
-//        Collection<ChessMove> totalMoves = new HashSet<>();
-//        for (int r = 1; r < 9; r++) {
-//            for (int c = 1; c < 9; c++) {
-//                ChessPiece temp = board.getPiece(new ChessPosition(r, c));
-//                if (temp != null && temp.getTeamColor() == teamColor) {
-//                    totalMoves.addAll(temp.pieceMoves(board, new ChessPosition(r, c)));
-//                }
-//            }
-//        }
-//
-//        for (ChessMove move : totalMoves) {
-//            try {
-//                makeMove(move);
-//                return false;
-//            } catch (InvalidMoveException e) {
-//                continue;
-//            }
-//        }
-//        // Couldn't find a move for any team of that color
-//        return true;
-
 
         ChessPosition myKingPosition = null;
         foundKing:
