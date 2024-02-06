@@ -304,8 +304,59 @@ public class ChessPiece {
         return legalMoves;
     }
 
+    private HashSet<ChessMove> castle(ChessBoard board,ChessPosition myPosition) {
+        HashSet<ChessMove> legalMoves = new HashSet<>();
+
+        // Skip if moved or not the right piece type
+        if (getHasMoved() || (getPieceType() != PieceType.ROOK || getPieceType() != PieceType.KING)) {
+            return legalMoves;
+        }
+
+        if (getPieceType() == PieceType.KING) {
+            // Move Right
+            ChessPosition newPosition1 = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
+            ChessPiece blockingPiece1 = pieceIsThere(board, newPosition1);
+            ChessPosition newPosition2 = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
+            ChessPiece blockingPiece2 = pieceIsThere(board, newPosition2);
+
+            if (blockingPiece1 == null && blockingPiece2 ==null) {
+                // King
+                legalMoves.add(new ChessMove(myPosition, newPosition2, null));
+                // Rook
+                legalMoves.add(new ChessMove(new ChessPosition(myPosition.getRow() + 3,myPosition.getColumn()), newPosition1, null));
+            }
+
+            // Move Left
+            newPosition1 = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+            blockingPiece1 = pieceIsThere(board, newPosition1);
+            newPosition2 = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+            blockingPiece2 = pieceIsThere(board, newPosition2);
+            ChessPosition newPosition3 = new ChessPosition(myPosition.getRow() - 3, myPosition.getColumn());
+            ChessPiece blockingPiece3 = pieceIsThere(board, newPosition3);
+
+            if (blockingPiece1 == null && blockingPiece2 == null && blockingPiece3 == null) {
+                // King
+                legalMoves.add(new ChessMove(myPosition, newPosition2, null));
+                // Rook
+                legalMoves.add(new ChessMove(new ChessPosition(myPosition.getRow() - 4,myPosition.getColumn()), newPosition1, null));
+            }
+
+        } else {
+            // Rook, move to right or left
+
+        }
+
+
+
+        return legalMoves;
+    }
+
     public void setHasMoved(boolean hasMoved) {
         this.hasMoved = hasMoved;
+    }
+
+    public boolean getHasMoved() {
+        return this.hasMoved;
     }
 }
 

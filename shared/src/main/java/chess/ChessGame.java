@@ -61,6 +61,12 @@ public class ChessGame {
         Collection<ChessMove> fullMoves = piece.pieceMoves(board,startPosition);
         Collection<ChessMove> validMoves = new HashSet<>();
 
+        // Castling
+        if (!piece.hasMoved &&
+            ((piece.getPieceType() == ChessPiece.PieceType.ROOK) || (piece.getPieceType() == ChessPiece.PieceType.KING)) {
+
+        }
+
         for (ChessMove move : fullMoves) {
             ChessBoard tempBoard = board.clone();
             try {
@@ -186,50 +192,6 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         // Same as in Check, just check this condition at different times
         return isInCheck(teamColor);
-
-//        // Get same color king's position
-//        ChessPosition myKingPosition = null;
-//
-//        foundKing:
-//        for (int r = 1; r < 9; r++) {
-//            for (int c = 1; c < 9; c++) {
-//                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
-//                if (temp != null && temp.getPieceType() == ChessPiece.PieceType.KING && temp.getTeamColor() == teamColor) {
-//                    myKingPosition = new ChessPosition(r,c);
-//                    break foundKing;
-//                }
-//            }
-//        }
-//
-//        if (myKingPosition == null) {
-//            // If myKing's square is null, myKing isn't on the board, so can't be in checkmate
-//            return false;
-//        }
-//
-//        // Check all pieces of opposing team's legal moves. If position of same color king is in those moves, return true;
-//        Collection<ChessMove> totalMoves = new HashSet<>();
-//        for (int r = 1; r < 9; r++) {
-//            for (int c = 1; c < 9; c++) {
-//                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
-//                if (temp != null && temp.getTeamColor() != teamColor) {
-//                    totalMoves.addAll(temp.pieceMoves(board, new ChessPosition(r,c)));
-//                }
-//            }
-//        }
-//
-//        for (ChessMove move : totalMoves) {
-//            // Check if enemy pieces can move into myKing's square
-//            // Already checked if myKing is null
-//
-//            ChessPosition a = move.getEndPosition();
-//            if (myKingPosition.equals(move.getEndPosition())) {
-//                return true;
-//            }
-//        }
-//
-//        // They made it through everything, so it must not be in checkmate
-//        return false;
-
     }
 
     /**
