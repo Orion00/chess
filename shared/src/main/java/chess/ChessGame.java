@@ -2,7 +2,6 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -14,10 +13,6 @@ public class ChessGame {
 
     TeamColor turn;
     ChessBoard board;
-
-    // TODO: Decide if I only need once since they contain the color
-    Collection<ChessPiece> blackCaptured;
-    Collection<ChessPiece> whiteCaptured;
 
 
     public ChessGame() {
@@ -62,7 +57,6 @@ public class ChessGame {
             // No piece there
             return null;
         }
-
         return piece.pieceMoves(board,startPosition);
     }
 
@@ -150,6 +144,7 @@ public class ChessGame {
                 ChessPiece temp = board.getPiece(new ChessPosition(r,c));
                 if (temp != null && temp.getTeamColor() != teamColor) {
                     totalMoves.addAll(temp.pieceMoves(board, new ChessPosition(r,c)));
+
                 }
             }
         }
@@ -158,7 +153,6 @@ public class ChessGame {
             // Check in enemy pieces can move into myKing's square
             // Already checked if myKing is null
 
-            ChessPosition a = move.getEndPosition();
             if (myKingPosition.equals(move.getEndPosition())) {
                 return true;
             }
@@ -175,7 +169,52 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Same as in Check, just check this condition at different times
+        return isInCheck(teamColor);
+
+//        // Get same color king's position
+//        ChessPosition myKingPosition = null;
+//
+//        foundKing:
+//        for (int r = 1; r < 9; r++) {
+//            for (int c = 1; c < 9; c++) {
+//                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
+//                if (temp != null && temp.getPieceType() == ChessPiece.PieceType.KING && temp.getTeamColor() == teamColor) {
+//                    myKingPosition = new ChessPosition(r,c);
+//                    break foundKing;
+//                }
+//            }
+//        }
+//
+//        if (myKingPosition == null) {
+//            // If myKing's square is null, myKing isn't on the board, so can't be in checkmate
+//            return false;
+//        }
+//
+//        // Check all pieces of opposing team's legal moves. If position of same color king is in those moves, return true;
+//        Collection<ChessMove> totalMoves = new HashSet<>();
+//        for (int r = 1; r < 9; r++) {
+//            for (int c = 1; c < 9; c++) {
+//                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
+//                if (temp != null && temp.getTeamColor() != teamColor) {
+//                    totalMoves.addAll(temp.pieceMoves(board, new ChessPosition(r,c)));
+//                }
+//            }
+//        }
+//
+//        for (ChessMove move : totalMoves) {
+//            // Check if enemy pieces can move into myKing's square
+//            // Already checked if myKing is null
+//
+//            ChessPosition a = move.getEndPosition();
+//            if (myKingPosition.equals(move.getEndPosition())) {
+//                return true;
+//            }
+//        }
+//
+//        // They made it through everything, so it must not be in checkmate
+//        return false;
+
     }
 
     /**
@@ -186,7 +225,65 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+//        // Find all moves that pieces of that team can make
+//        Collection<ChessMove> totalMoves = new HashSet<>();
+//        for (int r = 1; r < 9; r++) {
+//            for (int c = 1; c < 9; c++) {
+//                ChessPiece temp = board.getPiece(new ChessPosition(r, c));
+//                if (temp != null && temp.getTeamColor() == teamColor) {
+//                    totalMoves.addAll(temp.pieceMoves(board, new ChessPosition(r, c)));
+//                }
+//            }
+//        }
+//
+//        for (ChessMove move : totalMoves) {
+//            try {
+//                makeMove(move);
+//                return false;
+//            } catch (InvalidMoveException e) {
+//                continue;
+//            }
+//        }
+//        // Couldn't find a move for any team of that color
+//        return true;
+
+
+        ChessPosition myKingPosition = null;
+        foundKing:
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
+                if (temp != null && temp.getPieceType() == ChessPiece.PieceType.KING && temp.getTeamColor() == teamColor) {
+                    myKingPosition = new ChessPosition(r,c);
+                    break foundKing;
+                }
+            }
+        }
+
+        if (myKingPosition == null) {
+            // If myKing's square is null, myKing isn't on the board, so can't be in stalemate
+            return false;
+        }
+
+        Collection<ChessMove> validMoves = validMoves(myKingPosition);
+        if (validMoves == null) {
+            return true;
+        }
+
+        for (ChessMove move : validMoves) {
+            // See if king can move in any of these directions
+            try {
+                // If it can, return False;
+                tryAMove(move, board.getPiece(myKingPosition));
+                return false;
+            } catch (InvalidMoveException i){
+                // If it can't, continue through more valid moves
+                continue;
+            }
+
+        }
+        // If none of the valid moves were actually valid, in stalemate
+        return true;
     }
 
     /**
@@ -209,7 +306,6 @@ public class ChessGame {
 
     private void tryAMove(ChessMove move, ChessPiece movingPiece) throws InvalidMoveException {
         ChessBoard tempBoard = board.clone();
-        ChessBoard t = board.clone();
         board.addPiece(move.getStartPosition(),null);
         board.addPiece(move.getEndPosition(), movingPiece);
 
@@ -223,7 +319,6 @@ public class ChessGame {
 
     private void promoteIfNeeded(ChessMove move) {
         ChessPiece piece = board.getPiece(move.getEndPosition());
-
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             if (move.getEndPosition().getRow() == 8 && piece.getTeamColor() == TeamColor.WHITE) {
