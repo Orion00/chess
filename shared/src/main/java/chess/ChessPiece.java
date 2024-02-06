@@ -19,7 +19,13 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
-        hasMoved = false;
+        this.hasMoved = false;
+    }
+
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type, boolean hasMoved) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+        this.hasMoved = hasMoved;
     }
 
     /**
@@ -92,6 +98,8 @@ public class ChessPiece {
                 for (List<Integer> move : availableMoves) {
                     legalMoves.addAll(moveOnce(board, myPosition,move));
                 }
+                // Adds Castling moves if available
+
                 break;
             }
             case QUEEN -> {
@@ -308,45 +316,45 @@ public class ChessPiece {
         HashSet<ChessMove> legalMoves = new HashSet<>();
 
         // Skip if moved or not the right piece type
-        if (getHasMoved() || (getPieceType() != PieceType.ROOK || getPieceType() != PieceType.KING)) {
+        if (getHasMoved() || ((myPosition.getColumn() != 5) || !(myPosition.getRow() == 1 || myPosition.getRow() == 8)) || !(getPieceType() == PieceType.KING)) {
             return legalMoves;
         }
 
-        if (getPieceType() == PieceType.KING) {
-            // Move Right
-            ChessPosition newPosition1 = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
-            ChessPiece blockingPiece1 = pieceIsThere(board, newPosition1);
-            ChessPosition newPosition2 = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn());
-            ChessPiece blockingPiece2 = pieceIsThere(board, newPosition2);
 
-            if (blockingPiece1 == null && blockingPiece2 ==null) {
-                // King
-                legalMoves.add(new ChessMove(myPosition, newPosition2, null));
-                // Rook
-                legalMoves.add(new ChessMove(new ChessPosition(myPosition.getRow() + 3,myPosition.getColumn()), newPosition1, null));
-            }
+        // Move Right
+        ChessPosition newPosition1 = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1);
+        ChessPiece blockingPiece1 = pieceIsThere(board, newPosition1);
+        ChessPosition newPosition2 = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 2);
+        ChessPiece blockingPiece2 = pieceIsThere(board, newPosition2);
+        ChessPosition rightRookPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 3);
+        ChessPiece rightRook = board.getPiece(rightRookPosition);
 
-            // Move Left
-            newPosition1 = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
-            blockingPiece1 = pieceIsThere(board, newPosition1);
-            newPosition2 = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-            blockingPiece2 = pieceIsThere(board, newPosition2);
-            ChessPosition newPosition3 = new ChessPosition(myPosition.getRow() - 3, myPosition.getColumn());
-            ChessPiece blockingPiece3 = pieceIsThere(board, newPosition3);
 
-            if (blockingPiece1 == null && blockingPiece2 == null && blockingPiece3 == null) {
-                // King
-                legalMoves.add(new ChessMove(myPosition, newPosition2, null));
-                // Rook
-                legalMoves.add(new ChessMove(new ChessPosition(myPosition.getRow() - 4,myPosition.getColumn()), newPosition1, null));
-            }
-
-        } else {
-            // Rook, move to right or left
-
+        if (blockingPiece1 == null && blockingPiece2 == null
+            && rightRook != null && !rightRook.hasMoved) {
+            // King
+            legalMoves.add(new ChessMove(myPosition, newPosition2, null));
+            // Rook
+            legalMoves.add(new ChessMove(new ChessPosition(myPosition.getRow(),myPosition.getColumn() + 3), newPosition1, null));
         }
 
+        // Move Left
+        newPosition1 = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1);
+        blockingPiece1 = pieceIsThere(board, newPosition1);
+        newPosition2 = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 2);
+        blockingPiece2 = pieceIsThere(board, newPosition2);
+        ChessPosition newPosition3 = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 3);
+        ChessPiece blockingPiece3 = pieceIsThere(board, newPosition3);
+        ChessPosition leftRookPosition = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 4);
+        ChessPiece leftRook = board.getPiece(leftRookPosition);
 
+        if (blockingPiece1 == null && blockingPiece2 == null && blockingPiece3 == null
+            && leftRook != null && !leftRook.hasMoved) {
+            // King
+            legalMoves.add(new ChessMove(myPosition, newPosition2, null));
+            // Rook
+            legalMoves.add(new ChessMove(new ChessPosition(myPosition.getRow(),myPosition.getColumn() - 4), newPosition1, null));
+        }
 
         return legalMoves;
     }
@@ -358,6 +366,7 @@ public class ChessPiece {
     public boolean getHasMoved() {
         return this.hasMoved;
     }
+
 }
 
 

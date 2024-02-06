@@ -109,7 +109,7 @@ public class ChessBoard implements Cloneable {
             for (int c = 1; c < 9; c++) {
                 ChessPiece tempPiece = this.getPiece(new ChessPosition(r,c));
                 if (tempPiece != null) {
-                    ChessPiece h = new ChessPiece(tempPiece.getTeamColor(),tempPiece.getPieceType());
+                    ChessPiece h = new ChessPiece(tempPiece.getTeamColor(),tempPiece.getPieceType(), tempPiece.getHasMoved());
                     tempBoard.addPiece(new ChessPosition(r,c), h);
                 }
 

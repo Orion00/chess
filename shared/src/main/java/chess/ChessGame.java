@@ -61,12 +61,6 @@ public class ChessGame {
         Collection<ChessMove> fullMoves = piece.pieceMoves(board,startPosition);
         Collection<ChessMove> validMoves = new HashSet<>();
 
-        // Castling
-        if (!piece.hasMoved &&
-            ((piece.getPieceType() == ChessPiece.PieceType.ROOK) || (piece.getPieceType() == ChessPiece.PieceType.KING)) {
-
-        }
-
         for (ChessMove move : fullMoves) {
             ChessBoard tempBoard = board.clone();
             try {
@@ -83,6 +77,34 @@ public class ChessGame {
                 setBoard(tempBoard);
             }
 
+        }
+
+        Collection<ChessMove> castleMoves = piece.pieceMoves(board,startPosition);
+        for (ChessMove move : castleMoves) {
+            ChessBoard tempBoard = board.clone();
+            try {
+                if (move.getEndPosition().getColumn() == 3) {
+                    // Check a move to the left, so -1
+                    ChessPosition intermediatePosition = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn()-1);
+                    board.addPiece(move.getStartPosition(), null);
+                    board.addPiece(intermediatePosition, piece);
+                } else if (move.getEndPosition().getColumn() == 7) {
+                    // Check a move to the right, so +1
+                    ChessPosition intermediatePosition = new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn()+1);
+                    board.addPiece(move.getStartPosition(), null);
+                    board.addPiece(intermediatePosition, piece);
+                }
+
+
+                if (isInCheck(piece.getTeamColor())) {
+                    throw new InvalidMoveException("That leaves you in check");
+                }
+                validMoves.add(move);
+            } catch (InvalidMoveException i) {
+//                System.out.println("Can't move there. "+i.getMessage());
+            } finally {
+                setBoard(tempBoard);
+            }
         }
         return validMoves;
     }
@@ -114,6 +136,39 @@ public class ChessGame {
         try {
             tryAMove(move, piece);
             promoteIfNeeded(move);
+
+
+            // Check for Castling
+            if (piece.getPieceType() == ChessPiece.PieceType.KING && !piece.getHasMoved()) {
+                    if (move.getEndPosition().getColumn() == 3)  {
+                        for (ChessMove rookMove : validMoves) {
+                            if (rookMove.getStartPosition() != move.getStartPosition()) {
+                                if (rookMove.getStartPosition().getColumn() == 1) {
+                                    tryAMove(rookMove, board.getPiece(rookMove.getStartPosition()));
+                                    ChessPiece rook = board.getPiece(rookMove.getStartPosition());
+                                    rook.setHasMoved(true);
+                                    break;
+                                }
+                            }
+                        }
+                    } else if (move.getEndPosition().getColumn() == 7){
+                    // Cycle through all moves, if there's one that's different, it has to be the rook moving as well
+                            for (ChessMove rookMove : validMoves) {
+                                if (rookMove.getStartPosition() != move.getStartPosition()) {
+                                    if (rookMove.getStartPosition().getColumn() == 8) {
+                                        tryAMove(rookMove, board.getPiece(rookMove.getStartPosition()));
+                                        ChessPiece rook = board.getPiece(rookMove.getStartPosition());
+                                        rook.setHasMoved(true);
+                                        break;
+                                    }
+                                }
+
+
+                                }
+                }
+
+            }
+
             piece.setHasMoved(true);
 
             // Changes turn
