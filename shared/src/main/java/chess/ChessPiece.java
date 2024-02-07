@@ -312,7 +312,7 @@ public class ChessPiece {
         return legalMoves;
     }
 
-    private HashSet<ChessMove> castle(ChessBoard board,ChessPosition myPosition) {
+    public HashSet<ChessMove> castle(ChessBoard board,ChessPosition myPosition) {
         HashSet<ChessMove> legalMoves = new HashSet<>();
 
         // Skip if moved or not the right piece type

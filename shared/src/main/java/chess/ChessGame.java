@@ -79,7 +79,7 @@ public class ChessGame {
 
         }
 
-        Collection<ChessMove> castleMoves = piece.pieceMoves(board,startPosition);
+        Collection<ChessMove> castleMoves = piece.castle(board,startPosition);
         for (ChessMove move : castleMoves) {
             ChessBoard tempBoard = board.clone();
             try {
@@ -144,8 +144,9 @@ public class ChessGame {
                         for (ChessMove rookMove : validMoves) {
                             if (rookMove.getStartPosition() != move.getStartPosition()) {
                                 if (rookMove.getStartPosition().getColumn() == 1) {
-                                    tryAMove(rookMove, board.getPiece(rookMove.getStartPosition()));
                                     ChessPiece rook = board.getPiece(rookMove.getStartPosition());
+                                    tryAMove(rookMove, board.getPiece(rookMove.getStartPosition()));
+
                                     rook.setHasMoved(true);
                                     break;
                                 }
@@ -156,8 +157,9 @@ public class ChessGame {
                             for (ChessMove rookMove : validMoves) {
                                 if (rookMove.getStartPosition() != move.getStartPosition()) {
                                     if (rookMove.getStartPosition().getColumn() == 8) {
-                                        tryAMove(rookMove, board.getPiece(rookMove.getStartPosition()));
                                         ChessPiece rook = board.getPiece(rookMove.getStartPosition());
+                                        tryAMove(rookMove, board.getPiece(rookMove.getStartPosition()));
+
                                         rook.setHasMoved(true);
                                         break;
                                     }
