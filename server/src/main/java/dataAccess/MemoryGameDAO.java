@@ -40,10 +40,11 @@ public class MemoryGameDAO implements GameDAO{
 
     @Override
     public GameData createGame(String gameName) throws DataAccessException {
-        if (games.containsKey(gameName)) {
+        if (getGame(gameName) != null) {
             throw new DataAccessException("That game name already exists");
         } else {
             // TODO: Find a better way to create a gameID other than the size of the HashMap
+            // Randomly generate (check if exists, otherwise generate again) or autoincrement
             GameData game = new GameData(games.size(),null,null,gameName,new ChessGame());
             games.put(gameName, game);
             return game;

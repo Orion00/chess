@@ -5,7 +5,7 @@ import model.UserData;
 
 public interface AuthDAO {
     AuthData getAuthUser(AuthData auth);
-    AuthData createAuth(UserData user) throws DataAccessException;
+    AuthData createAuth(UserData user);
     void removeAuthUser(AuthData auth) throws DataAccessException;
-    void clearAuths() throws DataAccessException;
+    void clearAuths();
 }
