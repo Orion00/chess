@@ -1,5 +1,7 @@
 package service;
 
+import chess.ChessGame;
+import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -7,17 +9,63 @@ import model.UserData;
 import java.util.List;
 
 public class GameService {
-    public List<GameData> ListGames(AuthData auth) {
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final UserDAO userDAO;
+    public GameService() {
+        this.authDAO = new MemoryAuthDAO();
+        this.gameDAO = new MemoryGameDAO();
+        this.userDAO = new MemoryUserDAO();
+    }
+    public List<GameData> ListGames(AuthData auth) throws DataAccessException {
+        List<GameData> games;
         // Call Data Access Functions
+        try {
+            getAuthUser(auth);
+            games = gameDAO.getGames();
+        } catch (DataAccessException i) {
+            throw new DataAccessException(i.getMessage());
+        }
 
+        return games;
+
+    }
+    public GameData createGame(AuthData auth, String newGameName) throws DataAccessException {
+        // Call Data Access Functions
+        try {
+            getAuthUser(auth);
+            if (gameDAO.getGame(newGameName) == null) {
+                return gameDAO.createGame(newGameName);
+            }
+
+        } catch  (DataAccessException i){
+            throw new DataAccessException(i.getMessage());
+        }
         return null;
     }
-    public GameData createGame(AuthData auth, String newGameName) {
+    public void joinGame(AuthData auth, String playerColor, Integer gameID) throws DataAccessException{
         // Call Data Access Functions
-
-        return null;
+        try {
+            getAuthUser(auth);
+            ChessGame.TeamColor color;
+            if (playerColor.equals("WHITE")) {
+                color = ChessGame.TeamColor.WHITE;
+            } else if (playerColor.equals("BLACK")) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                throw new DataAccessException("Invalid color entered");
+            }
+            gameDAO.addParticipant(gameID,auth.username(), color);
+        } catch (DataAccessException i) {
+            throw new DataAccessException(i.getMessage());
+        }
     }
-    public void joinGame(AuthData auth, String playerColor, Integer gameID) {
-        // Call Data Access Functions
+
+    private AuthData getAuthUser(AuthData auth) throws DataAccessException {
+        AuthData authData = authDAO.getAuthUser(auth);
+        if (authData == null) {
+            throw new DataAccessException("Unauthorized");
+        }
+            return authData;
     }
 }
