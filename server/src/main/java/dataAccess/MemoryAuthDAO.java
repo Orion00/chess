@@ -3,6 +3,7 @@ package dataAccess;
 import model.AuthData;
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class MemoryAuthDAO implements AuthDAO{
     }
 
     @Override
-    public void clearAuths() {
+    public void clearAuths() throws DataAccessException {
         auths.clear();
     }
 }
