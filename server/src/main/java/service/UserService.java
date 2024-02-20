@@ -1,20 +1,59 @@
 package service;
 
+import dataAccess.*;
 import model.AuthData;
 import model.UserData;
 
+import javax.xml.crypto.Data;
+
 public class UserService {
-    public AuthData register(UserData user) {
-        // Call Data Access Functions
-
-        return null;
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final UserDAO userDAO;
+    UserService () {
+        this.authDAO = new MemoryAuthDAO();
+        this.gameDAO = new MemoryGameDAO();
+        this.userDAO = new MemoryUserDAO();
     }
-    public AuthData login(UserData user) {
-        // Call Data Access Functions
 
-        return null;
-    }
-    public void logout(UserData user) {
+    public AuthData register(UserData user) throws DataAccessException{
         // Call Data Access Functions
+        try {
+            UserData foundUser = userDAO.getUser(user);
+            if (foundUser != null) {
+                throw new DataAccessException("403: already taken");
+            }
+            userDAO.createUser(user);
+            return authDAO.createAuth(user);
+        } catch (DataAccessException i) {
+            throw new DataAccessException(i.getMessage());
+        }
+    }
+    public AuthData login(UserData user) throws DataAccessException {
+        // Call Data Access Functions
+        try {
+            UserData foundUser = userDAO.getUser(user);
+            if (foundUser == null) {
+                throw new DataAccessException("400: User doesn't exist");
+            }
+            if (!user.password().equals(foundUser.password())) {
+                throw new DataAccessException("401: Unauthorized");
+            }
+            return authDAO.createAuth(user);
+
+        } catch (DataAccessException i){
+            throw new DataAccessException(i.getMessage());
+        }
+    }
+    public void logout(AuthData auth) throws DataAccessException {
+        // Call Data Access Functions
+        try {
+            if (authDAO.getAuthUser(auth) == null) {
+                throw new DataAccessException("401: Unauthorized");
+            }
+            authDAO.removeAuthUser(auth);
+        } catch (DataAccessException i) {
+            throw new DataAccessException(i.getMessage());
+        }
     }
 }
