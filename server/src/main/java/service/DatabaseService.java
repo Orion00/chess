@@ -9,10 +9,10 @@ public class DatabaseService {
     private final GameDAO gameDAO;
     private final UserDAO userDAO;
 
-    public DatabaseService() {
-        this.authDAO = new MemoryAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
-        this.userDAO = new MemoryUserDAO();
+    public DatabaseService(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+        this.userDAO = userDAO;
     }
 
     public void clearApp() throws DataAccessException {

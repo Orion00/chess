@@ -11,11 +11,9 @@ import java.util.List;
 public class GameService {
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
-    private final UserDAO userDAO;
-    public GameService() {
-        this.authDAO = new MemoryAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
-        this.userDAO = new MemoryUserDAO();
+    public GameService(AuthDAO authDAO, GameDAO gameDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
     }
     public List<GameData> ListGames(AuthData auth) throws DataAccessException {
         List<GameData> games;

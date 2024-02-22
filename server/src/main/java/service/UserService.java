@@ -8,12 +8,10 @@ import javax.xml.crypto.Data;
 
 public class UserService {
     private final AuthDAO authDAO;
-    private final GameDAO gameDAO;
     private final UserDAO userDAO;
-    UserService () {
-        this.authDAO = new MemoryAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
-        this.userDAO = new MemoryUserDAO();
+    public UserService(AuthDAO authDAO, UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.userDAO = userDAO;
     }
 
     public AuthData register(UserData user) throws DataAccessException{
