@@ -47,9 +47,9 @@ public class UserService {
         // Call Data Access Functions
         try {
             if (authDAO.getAuthUser(auth) == null) {
-                throw new DataAccessException("401: Unauthorized");
+                throw new DataAccessException("Unauthorized");
             }
-            authDAO.removeAuthUser(auth);
+           authDAO.removeAuthUser(auth);
         } catch (DataAccessException i) {
             throw new DataAccessException(i.getMessage());
         }

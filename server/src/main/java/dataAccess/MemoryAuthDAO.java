@@ -33,7 +33,7 @@ public class MemoryAuthDAO implements AuthDAO{
         if (getAuthUser(auth) == null) {
             throw new DataAccessException("That AuthToken doesn't exist");
         }
-        auths.remove(auth.username());
+        auths.remove(auth.authToken());
     }
 
     @Override

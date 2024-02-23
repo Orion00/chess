@@ -1,13 +1,15 @@
-package service;
+package serviceTests;
 
-import dataAccess.DataAccessException;
-import dataAccess.MemoryAuthDAO;
-import dataAccess.MemoryGameDAO;
-import dataAccess.MemoryUserDAO;
+import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
+import service.DatabaseService;
+import service.GameService;
+import service.UserService;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -98,5 +100,45 @@ class UserServiceTest {
     public void LoginPass() {
         Assertions.assertDoesNotThrow(() -> userService.register(user));
         Assertions.assertDoesNotThrow(() -> userService.login(user));
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Logout - Unauthorized Wrong AuthToken")
+    public void LogoutWrongAuthToken() {
+        String expectedException = "Unauthorized";
+
+        String uuid = UUID.randomUUID().toString();
+        authWrong = new AuthData(uuid, user.username());
+
+        DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.logout(authWrong));
+        assertEquals(expectedException,actualException.getMessage());
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Logout - Unauthorized Already Logged Out")
+    public void LogoutAlreadyLoggedOut() {
+        String expectedException = "Unauthorized";
+        AuthData auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
+        Assertions.assertDoesNotThrow(() -> userService.login(user));
+        Assertions.assertDoesNotThrow(() -> userService.logout(auth));
+
+        DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.logout(auth));
+        assertEquals(expectedException,actualException.getMessage());
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("Logout - Works Fine (Multiple Auth Tokens)")
+    public void LogoutPass() {
+        AuthData auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
+        Assertions.assertDoesNotThrow(() -> userService.login(user));
+        Assertions.assertDoesNotThrow(() -> userService.logout(auth));
+
+        UserData userOther = new UserData("OtherEarnest","4321",user.email());
+        AuthData authOther = Assertions.assertDoesNotThrow(() -> userService.register(userOther));
+        Assertions.assertDoesNotThrow(() -> userService.login(userOther));
+        Assertions.assertDoesNotThrow(() -> userService.logout(authOther));
     }
 }

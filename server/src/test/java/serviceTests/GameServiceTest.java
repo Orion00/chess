@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameServiceTest {
     private static DatabaseService databaseService;
     private static GameService gameService;
+
+    private static UserService userService;
     private static MemoryAuthDAO authDAO;
     private static MemoryGameDAO gameDAO;
     private static MemoryUserDAO userDAO;
@@ -34,6 +36,7 @@ class GameServiceTest {
         userDAO = new MemoryUserDAO();
         databaseService = new DatabaseService(authDAO,gameDAO,userDAO);
         gameService = new GameService(authDAO,gameDAO);
+        userService = new UserService(authDAO, userDAO);
         user = new UserData("EarnestI","1234","Earnest@Incompotence.com");
         authWrong = null;
     }
@@ -42,7 +45,8 @@ class GameServiceTest {
     public void reset() {
         try {
             databaseService.clearApp();
-            auth = authDAO.createAuth(user);
+//            auth = authDAO.createAuth(user);
+            auth = userService.register(user);
         } catch (DataAccessException e) {
             throw new RuntimeException("Failed to clear the DB");
         }
@@ -80,7 +84,7 @@ class GameServiceTest {
     @DisplayName("Create Game - Authorized")
     public void CreateGameAuthorized() {
         GameData expected = new GameData(0,null,null,"Game 0", null);
-        auth = authDAO.createAuth(user);
+
         GameData actual = Assertions.assertDoesNotThrow(() -> gameService.createGame(auth,"Game 0"));
         Assertions.assertEquals(expected.gameName(),actual.gameName());
     }
@@ -118,7 +122,7 @@ class GameServiceTest {
         }
 
         List<GameData> expected = new ArrayList<>();
-        auth = authDAO.createAuth(user);
+        auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
         List<GameData> actual = Assertions.assertDoesNotThrow(() ->gameService.ListGames(auth));
         Assertions.assertEquals(expected,actual);
     }
@@ -128,7 +132,7 @@ class GameServiceTest {
     @DisplayName("Join Game - Unauthorized")
     public void JoinGameUnauthorized() {
         String expectedException = "Unauthorized";
-        DataAccessException actualException =assertThrows(DataAccessException.class,() ->gameService.joinGame(authWrong,"WHITE",34));
+        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(authWrong,"WHITE",34));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -136,7 +140,6 @@ class GameServiceTest {
     @Order(8)
     @DisplayName("Join Game - Incorrect GameID")
     public void JoinGameWrongID() {
-        auth = authDAO.createAuth(user);
         String expectedException = "GameID doesn't exist";
         DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,"WHITE",404));
         assertEquals(expectedException,actualException.getMessage());
@@ -146,7 +149,6 @@ class GameServiceTest {
     @Order(9)
     @DisplayName("Join Game - Color Already Used")
     public void JoinGameColorAlreadyUsed() {
-        auth = authDAO.createAuth(user);
         Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,"WHITE",insertedGame.gameID()));
         String expectedException = "WHITE is already taken in this game";
         DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,"WHITE",insertedGame.gameID()));
@@ -157,7 +159,6 @@ class GameServiceTest {
     @Order(10)
     @DisplayName("Join Game - Invalid Color")
     public void JoinGameInvalidColor() {
-        auth = authDAO.createAuth(user);
         String expectedException = "Invalid color entered";
         DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,"MAGENTA",insertedGame.gameID()));
         assertEquals(expectedException,actualException.getMessage());
@@ -169,6 +170,7 @@ class GameServiceTest {
     public void JoinGameAuthorized() {
         auth = authDAO.createAuth(user);
         Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,"WHITE",insertedGame.gameID()));
+        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,"BLACK",insertedGame.gameID()));
     }
 
 
