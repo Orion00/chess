@@ -74,9 +74,9 @@ class UserServiceTest {
 
     @Test
     @Order(3)
-    @DisplayName("Login - Unauthorized Wrong Password")
+    @DisplayName("Login - unauthorized Wrong Password")
     public void LoginWrongPassword() {
-        String expectedException = "Unauthorized";
+        String expectedException = "unauthorized";
         AuthData auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
         UserData userWrong = new UserData(user.username(),"4321",user.email());
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.login(userWrong));
@@ -104,9 +104,9 @@ class UserServiceTest {
 
     @Test
     @Order(6)
-    @DisplayName("Logout - Unauthorized Wrong AuthToken")
+    @DisplayName("Logout - unauthorized Wrong AuthToken")
     public void LogoutWrongAuthToken() {
-        String expectedException = "Unauthorized";
+        String expectedException = "unauthorized";
 
         String uuid = UUID.randomUUID().toString();
         authWrong = new AuthData(uuid, user.username());
@@ -117,9 +117,9 @@ class UserServiceTest {
 
     @Test
     @Order(7)
-    @DisplayName("Logout - Unauthorized Already Logged Out")
+    @DisplayName("Logout - unauthorized Already Logged Out")
     public void LogoutAlreadyLoggedOut() {
-        String expectedException = "Unauthorized";
+        String expectedException = "unauthorized";
         AuthData auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
         Assertions.assertDoesNotThrow(() -> userService.login(user));
         Assertions.assertDoesNotThrow(() -> userService.logout(auth));

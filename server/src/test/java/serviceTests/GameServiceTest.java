@@ -63,9 +63,9 @@ class GameServiceTest {
 
     @Test
     @Order(1)
-    @DisplayName("Create Game - Unauthorized")
+    @DisplayName("Create Game - unauthorized")
     public void CreateGameUnauthorized() {
-        String expectedException = "Unauthorized";
+        String expectedException = "unauthorized";
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> gameService.createGame(authWrong,"Game 34"));
         assertEquals(expectedException,actualException.getMessage());
     }
@@ -91,9 +91,9 @@ class GameServiceTest {
 
     @Test
     @Order(4)
-    @DisplayName("List Games - Unauthorized")
+    @DisplayName("List Games - unauthorized")
     public void ListGamesUnauthorized() {
-        String expectedException = "Unauthorized";
+        String expectedException = "unauthorized";
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> gameService.ListGames(authWrong));
         assertEquals(expectedException,actualException.getMessage());
     }
@@ -129,9 +129,9 @@ class GameServiceTest {
 
     @Test
     @Order(7)
-    @DisplayName("Join Game - Unauthorized")
+    @DisplayName("Join Game - unauthorized")
     public void JoinGameUnauthorized() {
-        String expectedException = "Unauthorized";
+        String expectedException = "unauthorized";
         DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(authWrong,"WHITE",34));
         assertEquals(expectedException,actualException.getMessage());
     }
