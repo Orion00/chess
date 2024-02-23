@@ -34,12 +34,13 @@ public class GameService {
             getAuthUser(auth);
             if (gameDAO.getGame(newGameName) == null) {
                 return gameDAO.createGame(newGameName);
+            } else {
+                throw new DataAccessException("Game already exists");
             }
 
         } catch  (DataAccessException i){
             throw new DataAccessException(i.getMessage());
         }
-        return null;
     }
     public void joinGame(AuthData auth, String playerColor, Integer gameID) throws DataAccessException{
         // Call Data Access Functions

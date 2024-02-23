@@ -46,6 +46,8 @@ class DatabaseServiceTest {
         Assertions.assertDoesNotThrow(() -> databaseService.clearApp());
 //        Assertions.assertThrows(new DataAccessException(),() -> userService.login(user),);
 
+        // TODO: Finish this test
+
     }
 
 }

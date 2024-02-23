@@ -11,17 +11,21 @@ public class MemoryAuthDAO implements AuthDAO{
     final private HashMap<String, AuthData> auths = new HashMap<>();
     @Override
     public AuthData getAuthUser(AuthData auth) {
-        return auths.getOrDefault(auth.username(), null);
+        return auths.getOrDefault(auth.authToken(), null);
     }
 
     @Override
     public AuthData createAuth(UserData user) {
         // Makes sure there's only 1 authToken per user
-        if (auths.containsKey(user.username())) {
-            auths.remove(user.username());
-        }
-        UUID uuid = UUID.randomUUID();
-        return new AuthData(uuid, user.username());
+        // Update: Apparently this isn't intended functionality
+//        if (auths.containsKey(user.username())) {
+//            auths.remove(user.username());
+//        }
+
+        String uuid = UUID.randomUUID().toString();
+        AuthData newAuth = new AuthData(uuid, user.username());
+        auths.put(uuid, newAuth);
+        return newAuth;
     }
 
     @Override
