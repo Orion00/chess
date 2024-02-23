@@ -59,9 +59,32 @@ class UserServiceTest {
     @Order(1)
     @DisplayName("Register - User Already Exists")
     public void RegisterUserAlreadyExists() {
-        String expectedException = "Username is already taken";
+        String expectedException = "already taken";
         Assertions.assertDoesNotThrow(() -> userService.register(user));
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.register(user));
+        assertEquals(expectedException,actualException.getMessage());
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Register - No Username, Password, or Email Given")
+    public void RegisterNoPassword() {
+        String expectedException = "bad request";
+
+        UserData userWrong = new UserData("EarnestI",null,"Earnest@Incompotence.com");
+        DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.register(userWrong));
+        assertEquals(expectedException,actualException.getMessage());
+
+        UserData userWrong2 = new UserData("EarnestI","","Earnest@Incompotence.com");
+        actualException = assertThrows(DataAccessException.class,() -> userService.register(userWrong2));
+        assertEquals(expectedException,actualException.getMessage());
+
+        UserData userWrong3 = new UserData("","1234","Earnest@Incompotence.com");
+        actualException = assertThrows(DataAccessException.class,() -> userService.register(userWrong3));
+        assertEquals(expectedException,actualException.getMessage());
+
+        UserData userWrong4 = new UserData("EarnestI","",null);
+        actualException = assertThrows(DataAccessException.class,() -> userService.register(userWrong4));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -87,12 +110,12 @@ class UserServiceTest {
     @Order(4)
     @DisplayName("Login - User Doesn't Exist")
     public void LoginUserDoesntExist() {
-        String expectedException = "User doesn't exist";
-        AuthData auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
+        String expectedException = "bad request";
         UserData userWrong = new UserData("EarnestWigglebee","4321",user.email());
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.login(userWrong));
         assertEquals(expectedException,actualException.getMessage());
     }
+
 
     @Test
     @Order(5)

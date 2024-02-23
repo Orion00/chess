@@ -5,6 +5,7 @@ import model.AuthData;
 import model.UserData;
 
 import javax.xml.crypto.Data;
+import java.util.Objects;
 
 public class UserService {
     private final AuthDAO authDAO;
@@ -19,7 +20,12 @@ public class UserService {
         try {
             UserData foundUser = userDAO.getUser(user);
             if (foundUser != null) {
-                throw new DataAccessException("Username is already taken");
+                throw new DataAccessException("already taken");
+            } else if (Objects.isNull(user.username()) || user.username().isEmpty() ||
+                    Objects.isNull(user.password()) || user.password().isEmpty() ||
+                    Objects.isNull(user.email()) || user.email().isEmpty()) {
+                // Empty username, password, or email
+                throw new DataAccessException("bad request");
             }
             userDAO.createUser(user);
             return authDAO.createAuth(user);
@@ -32,10 +38,11 @@ public class UserService {
         try {
             UserData foundUser = userDAO.getUser(user);
             if (foundUser == null) {
-                throw new DataAccessException("User doesn't exist");
+                // User doesn't exist
+                throw new DataAccessException("bad request");
             }
             if (!user.password().equals(foundUser.password())) {
-                throw new DataAccessException("Unauthorized");
+                throw new DataAccessException("unauthorized");
             }
             return authDAO.createAuth(user);
 
@@ -47,7 +54,7 @@ public class UserService {
         // Call Data Access Functions
         try {
             if (authDAO.getAuthUser(auth) == null) {
-                throw new DataAccessException("Unauthorized");
+                throw new DataAccessException("unauthorized");
             }
            authDAO.removeAuthUser(auth);
         } catch (DataAccessException i) {

@@ -9,24 +9,18 @@ import service.UserService;
 import spark.*;
 
 public class Server {
-    private final AuthDAO authDAO;
-    private final GameDAO gameDAO;
-    private final UserDAO userDAO;
-    private final DatabaseService databaseService;
-    private final GameService gameService;
-    private final UserService userService;
 
     private final Handler handler;
     public Server() {
         // TODO: Change to DB*DAO when swapping out interfaces
-        this.authDAO = new MemoryAuthDAO();
-        this.gameDAO = new MemoryGameDAO();
-        this.userDAO = new MemoryUserDAO();
-        this.databaseService = new DatabaseService(authDAO, gameDAO, userDAO);
-        this.gameService = new GameService(authDAO, gameDAO);
-        this.userService = new UserService(authDAO, userDAO);
+        AuthDAO authDAO = new MemoryAuthDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
+        UserDAO userDAO = new MemoryUserDAO();
+        DatabaseService databaseService = new DatabaseService(authDAO, gameDAO, userDAO);
+        GameService gameService = new GameService(authDAO, gameDAO);
+        UserService userService = new UserService(authDAO, userDAO);
 
-        this.handler = new Handler(databaseService,gameService,userService);
+        this.handler = new Handler(databaseService, gameService, userService);
     }
 
     public int run(int desiredPort) {
@@ -35,10 +29,10 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.post("/pet", this::addPet);
-        Spark.get("/pet", this::listPets);
-        Spark.delete("/pet/:id", this::deletePet);
-        Spark.delete("/pet", this::deleteAllPets);
+        Spark.post("/db", this::delete);
+//        Spark.get("/pet", this::listPets);
+//        Spark.delete("/pet/:id", this::deletePet);
+//        Spark.delete("/pet", this::deleteAllPets);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
 
@@ -57,5 +51,11 @@ public class Server {
     private void exceptionHandler(ResponseException ex, Request req, Response res) {
         res.status(ex.StatusCode());
         res.body(ex.getMessage());
+    }
+
+    private Object delete(Request req, Response res) throws ResponseException {
+        handler.clear(req, res);
+        res.status(200);
+        return "";
     }
 }

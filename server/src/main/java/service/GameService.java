@@ -62,11 +62,11 @@ public class GameService {
 
     private AuthData getAuthUser(AuthData auth) throws DataAccessException {
         if (auth == null) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("unauthorized");
         }
         AuthData authData = authDAO.getAuthUser(auth);
         if (authData == null) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("unauthorized");
         }
             return authData;
     }
