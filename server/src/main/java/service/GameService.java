@@ -61,6 +61,9 @@ public class GameService {
     }
 
     private AuthData getAuthUser(AuthData auth) throws DataAccessException {
+        if (auth == null) {
+            throw new DataAccessException("Unauthorized");
+        }
         AuthData authData = authDAO.getAuthUser(auth);
         if (authData == null) {
             throw new DataAccessException("Unauthorized");
