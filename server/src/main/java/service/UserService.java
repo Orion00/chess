@@ -19,7 +19,7 @@ public class UserService {
         try {
             UserData foundUser = userDAO.getUser(user);
             if (foundUser != null) {
-                throw new DataAccessException("403: already taken");
+                throw new DataAccessException("Username is already taken");
             }
             userDAO.createUser(user);
             return authDAO.createAuth(user);
@@ -32,10 +32,10 @@ public class UserService {
         try {
             UserData foundUser = userDAO.getUser(user);
             if (foundUser == null) {
-                throw new DataAccessException("400: User doesn't exist");
+                throw new DataAccessException("User doesn't exist");
             }
             if (!user.password().equals(foundUser.password())) {
-                throw new DataAccessException("401: Unauthorized");
+                throw new DataAccessException("Unauthorized");
             }
             return authDAO.createAuth(user);
 

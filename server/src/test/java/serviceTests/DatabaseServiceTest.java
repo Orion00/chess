@@ -1,14 +1,11 @@
 package serviceTests;
 
-import dataAccess.DataAccessException;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
-import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import server.Server;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
@@ -17,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DatabaseServiceTest {
     private static DatabaseService databaseService;
-    private static GameService gameService;
-    private static UserService userService;
     private static MemoryAuthDAO authDAO;
     private static MemoryGameDAO gameDAO;
     private static MemoryUserDAO userDAO;
@@ -30,8 +25,6 @@ class DatabaseServiceTest {
        gameDAO = new MemoryGameDAO();
        userDAO = new MemoryUserDAO();
        databaseService = new DatabaseService(authDAO,gameDAO,userDAO);
-       gameService = new GameService(authDAO,gameDAO);
-       userService = new UserService(authDAO,userDAO);
    }
 
     @Test
@@ -40,14 +33,11 @@ class DatabaseServiceTest {
 
     }
 
+    @Test
     public void clearDatabaseFailTest() {
-        UserData user = new UserData("EarnestI","1234","Earnest@Incompotence.com");
-        Assertions.assertDoesNotThrow(() -> userService.register(user));
+        // NOTE: I don't know how to get a fail case on this until we get to SQL
+        // TODO: Finish this once we're done using in memory stuff
         Assertions.assertDoesNotThrow(() -> databaseService.clearApp());
-//        Assertions.assertThrows(new DataAccessException(),() -> userService.login(user),);
-
-        // TODO: Finish this test
-
     }
 
 }

@@ -9,17 +9,14 @@ import service.DatabaseService;
 import service.GameService;
 import service.UserService;
 
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
     private static DatabaseService databaseService;
     private static GameService gameService;
-    private static UserService userService;
     private static MemoryAuthDAO authDAO;
     private static MemoryGameDAO gameDAO;
     private static MemoryUserDAO userDAO;
@@ -37,8 +34,8 @@ class GameServiceTest {
         userDAO = new MemoryUserDAO();
         databaseService = new DatabaseService(authDAO,gameDAO,userDAO);
         gameService = new GameService(authDAO,gameDAO);
-        userService = new UserService(authDAO,userDAO);
         user = new UserData("EarnestI","1234","Earnest@Incompotence.com");
+        authWrong = null;
     }
 
     @BeforeEach
@@ -63,7 +60,7 @@ class GameServiceTest {
     @Test
     @Order(1)
     @DisplayName("Create Game - Unauthorized")
-    public void createGameUnauthorized() {
+    public void CreateGameUnauthorized() {
         String expectedException = "Unauthorized";
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> gameService.createGame(authWrong,"Game 34"));
         assertEquals(expectedException,actualException.getMessage());
@@ -72,7 +69,7 @@ class GameServiceTest {
     @Test
     @Order(2)
     @DisplayName("Create Game - Already Exists")
-    public void createGameAlreadyExists() {
+    public void CreateGameAlreadyExists() {
         String expectedException = "Game already exists";
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> gameService.createGame(auth,"Game 34"));
         assertEquals(expectedException,actualException.getMessage());
@@ -81,7 +78,7 @@ class GameServiceTest {
     @Test
     @Order(3)
     @DisplayName("Create Game - Authorized")
-    public void createGameAuthorized() {
+    public void CreateGameAuthorized() {
         GameData expected = new GameData(0,null,null,"Game 0", null);
         auth = authDAO.createAuth(user);
         GameData actual = Assertions.assertDoesNotThrow(() -> gameService.createGame(auth,"Game 0"));
