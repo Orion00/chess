@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import dataAccess.*;
 import exception.ResponseException;
 import handler.Handler;
@@ -29,8 +30,9 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.post("/db", this::delete);
-//        Spark.get("/pet", this::listPets);
+        Spark.delete("/db", this::delete);
+        Spark.post("/user", this::register);
+        Spark.post("/session", this::login);
 //        Spark.delete("/pet/:id", this::deletePet);
 //        Spark.delete("/pet", this::deleteAllPets);
         Spark.exception(ResponseException.class, this::exceptionHandler);
@@ -48,14 +50,29 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private void exceptionHandler(ResponseException ex, Request req, Response res) {
+    private Object exceptionHandler(ResponseException ex, Request req, Response res) {
+        // TODO: Make this return real JSON apparently
+        String body = "{\"message\": \""+ex.getMessage()+"\"}";
         res.status(ex.StatusCode());
-        res.body(ex.getMessage());
+        res.body(body);
+        return body;
     }
 
     private Object delete(Request req, Response res) throws ResponseException {
-        handler.clear(req, res);
+        Object response = handler.clear(req, res);
         res.status(200);
-        return "";
+        return response.toString();
+    }
+
+    private Object register(Request req, Response res) throws ResponseException {
+        Object response = handler.register(req, res);
+        res.status(200);
+        return response.toString();
+    }
+
+    private Object login(Request req, Response res) throws ResponseException {
+        Object response = handler.login(req, res);
+        res.status(200);
+        return response.toString();
     }
 }

@@ -30,7 +30,7 @@ public class Handler {
     public Object clear(Request req, Response res) throws ResponseException {
         try {
             databaseService.clearApp();
-            return gson.toJson("");
+            return gson.toJson("{}");
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -38,7 +38,7 @@ public class Handler {
 
     public Object register(Request req, Response res) throws ResponseException {
         try {
-            UserData user = (UserData)gson.fromJson(String.valueOf(req), UserData.class);
+            UserData user = gson.fromJson(req.body(), UserData.class);
             AuthData result = userService.register(user);
             return gson.toJson(result);
         } catch (DataAccessException i){
@@ -48,7 +48,7 @@ public class Handler {
 
     public Object login(Request req, Response res) throws ResponseException {
         try {
-            UserData user = (UserData)gson.fromJson(String.valueOf(req), UserData.class);
+            UserData user = gson.fromJson(req.body(), UserData.class);
             AuthData result = userService.login(user);
             return gson.toJson(result);
         } catch (DataAccessException i) {
@@ -58,7 +58,7 @@ public class Handler {
 
     public Object logout(Request req, Response res) throws ResponseException {
         try {
-            AuthData auth = (AuthData) gson.fromJson(req.headers("Authorization"), AuthData.class);
+            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
             userService.logout(auth);
             return gson.toJson("");
         } catch (DataAccessException i) {
@@ -68,7 +68,7 @@ public class Handler {
 
     public Object listGames(Request req, Response res) throws ResponseException {
         try {
-            AuthData auth = (AuthData) gson.fromJson(req.headers("Authorization"), AuthData.class);
+            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
             List<GameData> games = gameService.ListGames(auth);
             return gson.toJson(games);
         } catch (DataAccessException i) {
@@ -78,8 +78,8 @@ public class Handler {
 
     public Object createGame(Request req, Response res) throws ResponseException {
         try {
-            AuthData auth = (AuthData)gson.fromJson(req.headers("Authorization"), AuthData.class);
-            String gameName = (String)gson.toJson(req.body());
+            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
+            String gameName = gson.toJson(req.body());
             GameData game = gameService.createGame(auth, gameName);
             return gson.toJson(game.gameID());
         } catch (DataAccessException i) {
@@ -90,7 +90,7 @@ public class Handler {
     public Object joinGame(Request req, Response res) throws ResponseException {
         try {
             // TODO: Figure out how to get two things from the body
-            AuthData auth = (AuthData)gson.fromJson(req.headers("Authorization"), AuthData.class);
+            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
 //            String playerColor = (String)gson.toJson(req.body("playerColor"));
 //            Integer gameID = (String)gson.toJson(req.body("gameID"));
 //
@@ -104,22 +104,23 @@ public class Handler {
 
     private ResponseException convertException(DataAccessException i) {
         // Converts DataAccessException into Status Codes and Messages
-        Integer statusCode = null;
+        int statusCode;
         String errorMessage = i.getMessage();
-        if (errorMessage.equals("bad request")) {
-            // Currently using for user that doesn't exist
-            // Or creating user without a password
-            statusCode = 400;
-        } else if (errorMessage.equals("unauthorized")) {
-            // Wrong auth
-            statusCode = 401;
-        } else if (errorMessage.equals("already taken")) {
-            // Used for username not available in register or color not available in game
-            statusCode = 403;
-        } else {
-            // Catchall
-            statusCode = 500;
-        }
+        statusCode = switch (errorMessage) {
+            case "bad request" ->
+                // Currently using for user that doesn't exist
+                // Or creating user without a password
+                    400;
+            case "unauthorized" ->
+                // Wrong auth
+                    401;
+            case "already taken" ->
+                // Used for username not available in register or color not available in game
+                    403;
+            default ->
+                // Catchall
+                    500;
+        };
 
         return new ResponseException(statusCode, "Error: "+errorMessage);
     }
