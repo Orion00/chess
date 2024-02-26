@@ -3,6 +3,7 @@ package serviceTests;
 import dataAccess.*;
 import model.AuthData;
 import model.GameData;
+import model.JoiningGameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import service.DatabaseService;
@@ -132,7 +133,7 @@ class GameServiceTest {
     @DisplayName("Join Game - unauthorized")
     public void JoinGameUnauthorized() {
         String expectedException = "unauthorized";
-        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(authWrong,"WHITE",34));
+        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(authWrong,new JoiningGameData("WHITE",34)));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -141,7 +142,7 @@ class GameServiceTest {
     @DisplayName("Join Game - Incorrect GameID")
     public void JoinGameWrongID() {
         String expectedException = "GameID doesn't exist";
-        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,"WHITE",404));
+        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,new JoiningGameData("WHITE",404)));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -149,9 +150,9 @@ class GameServiceTest {
     @Order(9)
     @DisplayName("Join Game - Color Already Used")
     public void JoinGameColorAlreadyUsed() {
-        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,"WHITE",insertedGame.gameID()));
+        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth, new JoiningGameData("WHITE",insertedGame.gameID())));
         String expectedException = "WHITE is already taken in this game";
-        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,"WHITE",insertedGame.gameID()));
+        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,new JoiningGameData("WHITE",insertedGame.gameID())));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -160,7 +161,7 @@ class GameServiceTest {
     @DisplayName("Join Game - Invalid Color")
     public void JoinGameInvalidColor() {
         String expectedException = "Invalid color entered";
-        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,"MAGENTA",insertedGame.gameID()));
+        DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,new JoiningGameData("MAGENTA",insertedGame.gameID())));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -169,8 +170,8 @@ class GameServiceTest {
     @DisplayName("Join Game - Authorized")
     public void JoinGameAuthorized() {
         auth = authDAO.createAuth(user);
-        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,"WHITE",insertedGame.gameID()));
-        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,"BLACK",insertedGame.gameID()));
+        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,new JoiningGameData("WHITE",insertedGame.gameID())));
+        Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,new JoiningGameData("BLACK",insertedGame.gameID())));
     }
 
 

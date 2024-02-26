@@ -1,10 +1,11 @@
 package handler;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import dataAccess.DataAccessException;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
+import model.JoiningGameData;
 import model.UserData;
 import service.DatabaseService;
 import service.GameService;
@@ -12,6 +13,7 @@ import service.UserService;
 import spark.Request;
 import spark.Response;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 public class Handler {
@@ -91,12 +93,20 @@ public class Handler {
         try {
             // TODO: Figure out how to get two things from the body
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+
+            GsonBuilder builder = new GsonBuilder();
+//            builder.registerTypeAdapter(GameData.class, new JoiningGameDataDeserializer());
+//            Gson gson2 = builder.create();
+//
+//            GameData parsedGame = gson.fromJson(jsonString, GameData.class);
+
             String playerColor = gson.toJson(req.body(), String.class);
-            GameData join = gson.toJson(req.body(), GameData.class);
+
+
             //            Integer gameID = (String)gson.toJson(req.body("gameID"));
 //
-//            GameData game = gameService.joinGame(auth, playerColor, gameID);
-//            return gson.toJson(game.gameID());
+//            GameData game = gameService.joinGame(new AuthData(authToken, null), playerColor, game.gameID());
+//            return gson.toJson(game);
             throw new DataAccessException("Orion is stuck");
         } catch (DataAccessException i) {
             throw convertException(i);
@@ -125,4 +135,18 @@ public class Handler {
 
         return new ResponseException(statusCode, "Error: "+errorMessage);
     }
+
+    private static class JoiningGameDeserializer implements JsonDeserializer<JoiningGameData> {
+        @Override
+        public JoiningGameData deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            String colorString = jsonObject.get("playerColor").getAsString();
+            Integer gameIDString = jsonObject.get("gameID").getAsInt();
+
+            return new JoiningGameData(colorString, gameIDString);
+
+        }
+    }
+
 }

@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataAccess.*;
 import model.AuthData;
 import model.GameData;
+import model.JoiningGameData;
 import model.UserData;
 
 import java.util.List;
@@ -42,19 +43,19 @@ public class GameService {
             throw new DataAccessException(i.getMessage());
         }
     }
-    public void joinGame(AuthData auth, String playerColor, Integer gameID) throws DataAccessException{
+    public void joinGame(AuthData auth, JoiningGameData data) throws DataAccessException{
         // Call Data Access Functions
         try {
             getAuthUser(auth);
             ChessGame.TeamColor color;
-            if (playerColor.equals("WHITE")) {
+            if (data.playerColor().equals("WHITE")) {
                 color = ChessGame.TeamColor.WHITE;
-            } else if (playerColor.equals("BLACK")) {
+            } else if (data.playerColor().equals("BLACK")) {
                 color = ChessGame.TeamColor.BLACK;
             } else {
                 throw new DataAccessException("Invalid color entered");
             }
-            gameDAO.addParticipant(gameID,auth.username(), color);
+            gameDAO.addParticipant(data.gameID(),auth.username(), color);
         } catch (DataAccessException i) {
             throw new DataAccessException(i.getMessage());
         }
