@@ -33,8 +33,11 @@ public class Server {
         Spark.delete("/db", this::delete);
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);
-//        Spark.delete("/pet/:id", this::deletePet);
-//        Spark.delete("/pet", this::deleteAllPets);
+        Spark.delete("/session", this::logout);
+        Spark.get("/game", this::listGames);
+        Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
+
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
 
@@ -60,19 +63,41 @@ public class Server {
 
     private Object delete(Request req, Response res) throws ResponseException {
         Object response = handler.clear(req, res);
-        res.status(200);
-        return response.toString();
+        return handleHandlerResponse(req, res, response);
     }
 
     private Object register(Request req, Response res) throws ResponseException {
         Object response = handler.register(req, res);
-        res.status(200);
-        return response.toString();
+        return handleHandlerResponse(req, res, response);
     }
 
     private Object login(Request req, Response res) throws ResponseException {
         Object response = handler.login(req, res);
+        return handleHandlerResponse(req, res, response);
+    }
+
+    private Object logout(Request req, Response res) throws ResponseException {
+        Object response = handler.logout(req, res);
+        return handleHandlerResponse(req, res, response);
+    }
+
+    private Object listGames(Request req, Response res) throws ResponseException {
+        Object response = handler.listGames(req, res);
+        return handleHandlerResponse(req, res, response);
+    }
+
+    private Object createGame(Request req, Response res) throws ResponseException {
+        Object response = handler.createGame(req, res);
+        return handleHandlerResponse(req, res, response);
+    }
+
+    private Object joinGame(Request req, Response res) throws ResponseException {
+        Object response = handler.joinGame(req, res);
+        return handleHandlerResponse(req, res, response);
+    }
+
+    private Object handleHandlerResponse(Request req, Response res, Object handlerResponse) {
         res.status(200);
-        return response.toString();
+        return handlerResponse.toString();
     }
 }

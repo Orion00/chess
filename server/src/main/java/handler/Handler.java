@@ -58,9 +58,9 @@ public class Handler {
 
     public Object logout(Request req, Response res) throws ResponseException {
         try {
-            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
-            userService.logout(auth);
-            return gson.toJson("");
+            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+            userService.logout(new AuthData(authToken, null));
+            return gson.toJson("{}");
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -68,8 +68,8 @@ public class Handler {
 
     public Object listGames(Request req, Response res) throws ResponseException {
         try {
-            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
-            List<GameData> games = gameService.ListGames(auth);
+            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+            List<GameData> games = gameService.ListGames(new AuthData(authToken, null));
             return gson.toJson(games);
         } catch (DataAccessException i) {
             throw convertException(i);
@@ -78,10 +78,10 @@ public class Handler {
 
     public Object createGame(Request req, Response res) throws ResponseException {
         try {
-            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
+            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
             String gameName = gson.toJson(req.body());
-            GameData game = gameService.createGame(auth, gameName);
-            return gson.toJson(game.gameID());
+            GameData game = gameService.createGame(new AuthData(authToken,null), gameName);
+            return gson.toJson(game);
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -90,9 +90,10 @@ public class Handler {
     public Object joinGame(Request req, Response res) throws ResponseException {
         try {
             // TODO: Figure out how to get two things from the body
-            AuthData auth = gson.fromJson(req.headers("Authorization"), AuthData.class);
-//            String playerColor = (String)gson.toJson(req.body("playerColor"));
-//            Integer gameID = (String)gson.toJson(req.body("gameID"));
+            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+            String playerColor = gson.toJson(req.body(), String.class);
+            GameData join = gson.toJson(req.body(), GameData.class);
+            //            Integer gameID = (String)gson.toJson(req.body("gameID"));
 //
 //            GameData game = gameService.joinGame(auth, playerColor, gameID);
 //            return gson.toJson(game.gameID());
