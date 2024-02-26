@@ -74,8 +74,11 @@ public class MemoryGameDAO implements GameDAO{
         GameData updatedGame;
         if (ClientColor == ChessGame.TeamColor.WHITE) {
             updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
-        } else {
+        } else if (ClientColor == ChessGame.TeamColor.BLACK) {
             updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+        } else {
+            // Observer
+            updatedGame = game;
         }
         games.replace(gameID, updatedGame);
     }

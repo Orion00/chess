@@ -52,6 +52,8 @@ public class GameService {
                 color = ChessGame.TeamColor.WHITE;
             } else if (data.playerColor().equals("BLACK")) {
                 color = ChessGame.TeamColor.BLACK;
+            } else if (data.playerColor().isEmpty()) {
+                color = null;
             } else {
                 throw new DataAccessException("Invalid color entered");
             }

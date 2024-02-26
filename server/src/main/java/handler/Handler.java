@@ -91,23 +91,16 @@ public class Handler {
 
     public Object joinGame(Request req, Response res) throws ResponseException {
         try {
-            // TODO: Figure out how to get two things from the body
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
 
             GsonBuilder builder = new GsonBuilder();
-//            builder.registerTypeAdapter(GameData.class, new JoiningGameDataDeserializer());
-//            Gson gson2 = builder.create();
-//
-//            GameData parsedGame = gson.fromJson(jsonString, GameData.class);
+            builder.registerTypeAdapter(GameData.class, new JoiningGameDataDeserializer());
+            Gson gson2 = builder.create();
 
-            String playerColor = gson.toJson(req.body(), String.class);
+            JoiningGameData incomingGame = gson2.fromJson(req.body(), JoiningGameData.class);
 
-
-            //            Integer gameID = (String)gson.toJson(req.body("gameID"));
-//
-//            GameData game = gameService.joinGame(new AuthData(authToken, null), playerColor, game.gameID());
-//            return gson.toJson(game);
-            throw new DataAccessException("Orion is stuck");
+            gameService.joinGame(new AuthData(authToken, null), incomingGame);
+            return "{}";
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -136,7 +129,7 @@ public class Handler {
         return new ResponseException(statusCode, "Error: "+errorMessage);
     }
 
-    private static class JoiningGameDeserializer implements JsonDeserializer<JoiningGameData> {
+    private static class JoiningGameDataDeserializer implements JsonDeserializer<JoiningGameData> {
         @Override
         public JoiningGameData deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
