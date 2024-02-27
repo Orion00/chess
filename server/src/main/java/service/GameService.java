@@ -5,7 +5,6 @@ import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.JoiningGameData;
-import model.UserData;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class GameService {
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
     }
-    public List<GameData> ListGames(AuthData auth) throws DataAccessException {
+    public List<GameData> listGames(AuthData auth) throws DataAccessException {
         List<GameData> games;
         // Call Data Access Functions
         try {

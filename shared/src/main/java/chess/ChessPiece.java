@@ -103,7 +103,6 @@ public class ChessPiece {
                 break;
             }
             case QUEEN -> {
-                //TODO: Implement this
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
@@ -115,7 +114,6 @@ public class ChessPiece {
                 break;
             }
             case BISHOP -> {
-                //TODO: Implement this
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
                 legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
@@ -202,12 +200,9 @@ public class ChessPiece {
             // Check if a piece is blocking
             if (blockingPiece == null) {
                 // No piece blocking
-//                System.out.println("No piece blocking.");
                 if (horizontalIncrease == 0) {
-//                    System.out.println("so you're free to move to " + newPosition);
                     if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
                         // Promotion
-//                        System.out.println("And get promoted!");
                         legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
                         legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
                         legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
@@ -217,24 +212,14 @@ public class ChessPiece {
                         legalMoves.add(new ChessMove(myPosition, newPosition, null));
                     }
 
-                    // Move twice for the first move
-//                    if (myPosition.getRow() == 2 && this.pieceColor == ChessGame.TeamColor.WHITE) {
-//                        legalMoves.addAll(pawnMove(board, myPosition, Arrays.asList(2, 0)));
-//                    } else if (myPosition.getRow() == 7 && this.pieceColor == ChessGame.TeamColor.BLACK) {
-//                        legalMoves.addAll(pawnMove(board, myPosition, Arrays.asList(-2, 0)));
-//                    }
-                } else {
-//                    System.out.println("But you can't move sideways without violence");
                 }
             } else if (blockingPiece.getTeamColor() == this.getTeamColor() && horizontalIncrease == 0) {
                 // Same team is blocking
-//                System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
             } else if (blockingPiece.getTeamColor() != this.getTeamColor() && abs(horizontalIncrease) == 1) {
                 // Enemy team is blocking (and can be taken)
-//                System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
+
                 if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
                     // Promotion
-//                    System.out.println("And get promoted!");
                     legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
                     legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
                     legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
@@ -243,11 +228,7 @@ public class ChessPiece {
                     // No Promotion
                     legalMoves.add(new ChessMove(myPosition, newPosition, null));
                 }
-            } else {
-//                System.out.println("A pawn can't move that that!");
             }
-        } else {
-//            System.out.println(newPosition+" is out of bounds.");
         }
 
         return legalMoves;
@@ -265,18 +246,13 @@ public class ChessPiece {
             // Check if a piece is blocking
             if (blockingPiece == null) {
                 // No piece blocking
-//                System.out.println("No piece blocking so you're free to move to " + newPosition);
                 legalMoves.add(new ChessMove(myPosition, newPosition, null));
             } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
                 // Same team is blocking
-//                System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
             } else {
                 // Enemy team is blocking (and can be taken)
-//                System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
                 legalMoves.add(new ChessMove(myPosition, newPosition, null));
             }
-        } else {
-//            System.out.println(newPosition+" is out of bounds.");
         }
         return legalMoves;
     }
@@ -284,11 +260,8 @@ public class ChessPiece {
 
     private HashSet<ChessMove> recurKeepMoving(ChessBoard board, ChessPosition startPosition, ChessPosition currentPosition, int r,int c) {
         HashSet<ChessMove> legalMoves = new HashSet<>();
-//        System.out.println("Trying to move to " + (currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c));
-
         // Checks we're not off the game board
         if (currentPosition.getRow()+r > 8 || currentPosition.getRow()+r < 1 || currentPosition.getColumn()+c > 8 || currentPosition.getColumn()+c < 1) {
-//            System.out.println((currentPosition.getRow()+r)+","+(currentPosition.getColumn()+c) +" is an illegal move off the board. Stopping recursion.");
             return legalMoves;
         }
 
@@ -298,15 +271,12 @@ public class ChessPiece {
             // Check if a piece is blocking
         if (blockingPiece == null) {
             // No piece blocking, track the legal move and call function again
-//            System.out.println("No piece blocking so you're free to move to " + newPosition);
             legalMoves.add(new ChessMove(startPosition, newPosition, null));
             legalMoves.addAll(recurKeepMoving(board,startPosition,newPosition,r,c));
         } else if (blockingPiece.getTeamColor() == this.getTeamColor()) {
             // Same team is blocking
-//            System.out.println("Your own team (" + this.getTeamColor() + ") is blocking that! " + newPosition);
         } else {
             // Enemy team is blocking (and can be taken)
-//            System.out.println("You can take a " + blockingPiece.getPieceType() + " at " + newPosition);
             legalMoves.add(new ChessMove(startPosition, newPosition, null));
         }
         return legalMoves;
@@ -368,13 +338,3 @@ public class ChessPiece {
     }
 
 }
-
-
-//        | | |x| | | |x| |
-//        | | | |x| |x| | |
-//        | | | | |b| | | |
-//        | | | |x| |x| | |
-//        | | |x| | | |x| |
-//        | |x| | | | | |x|
-//        |x| | | | | | | |
-//        | | | | | | | | |

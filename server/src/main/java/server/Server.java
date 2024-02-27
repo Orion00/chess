@@ -13,7 +13,7 @@ public class Server {
 
     private final Handler handler;
     public Server() {
-        // TODO: Change to DB*DAO when swapping out interfaces
+        // Change to DB*DAO when swapping out interfaces
         AuthDAO authDAO = new MemoryAuthDAO();
         GameDAO gameDAO = new MemoryGameDAO();
         UserDAO userDAO = new MemoryUserDAO();
@@ -54,9 +54,8 @@ public class Server {
     }
 
     private Object exceptionHandler(ResponseException ex, Request req, Response res) {
-        // TODO: Make this return real JSON apparently
         String body = "{\"message\": \""+ex.getMessage()+"\"}";
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
         res.body(body);
         return body;
     }

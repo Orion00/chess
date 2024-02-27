@@ -19,10 +19,6 @@ public class MemoryGameDAO implements GameDAO{
     @Override
     public List<GameData> getGames() {
         List<GameData> allGames = new ArrayList<>(games.values());
-
-//        for (GameData game : games.values()) {
-//            allGames.add(game);
-//        }
         return allGames;
     }
 
@@ -48,8 +44,7 @@ public class MemoryGameDAO implements GameDAO{
         if (getGame(gameName) != null) {
             throw new DataAccessException("That game name already exists");
         } else {
-            // TODO: Find a better way to create a gameID other than the size of the HashMap
-            // Randomly generate (check if exists, otherwise generate again) or autoincrement
+            // Autoincrements instead of randomly generating (check if exists, otherwise generate again)
             GameData game = new GameData(nextId,null,null,gameName,new ChessGame());
             games.put(nextId, game);
             nextId++;
@@ -58,7 +53,7 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void addParticipant(Integer gameID, String username, ChessGame.TeamColor ClientColor) throws DataAccessException{
+    public void addParticipant(Integer gameID, String username, ChessGame.TeamColor clientColor) throws DataAccessException{
         GameData game = getGame(gameID);
         // Check if game exists
         if (game == null) {
@@ -66,17 +61,16 @@ public class MemoryGameDAO implements GameDAO{
             throw new DataAccessException("bad request");
         }
         // Check if someone is already playing
-        // TODO: See if this needs to check if same player is trying to join their own game
-        if ((ClientColor == ChessGame.TeamColor.WHITE && game.whiteUsername() != null)
-                || (ClientColor == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
+        if ((clientColor == ChessGame.TeamColor.WHITE && game.whiteUsername() != null)
+                || (clientColor == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
             // Color is already taken in this game
             throw new DataAccessException("already taken");
         }
 
         GameData updatedGame;
-        if (ClientColor == ChessGame.TeamColor.WHITE) {
+        if (clientColor == ChessGame.TeamColor.WHITE) {
             updatedGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
-        } else if (ClientColor == ChessGame.TeamColor.BLACK) {
+        } else if (clientColor == ChessGame.TeamColor.BLACK) {
             updatedGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
         } else {
             // Observer

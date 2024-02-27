@@ -27,8 +27,6 @@ public class ChessBoard implements Cloneable {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow()-1][position.getColumn()-1] = piece;
-//        System.out.println("Orion tries to add a piece");
-//        System.out.printf("It's %s at position %s%n", piece, position);
     }
 
     /**
@@ -113,14 +111,9 @@ public class ChessBoard implements Cloneable {
                     tempBoard.addPiece(new ChessPosition(r,c), h);
                 }
 
-//
-//                ChessPiece nott = tempBoard.getPiece(new ChessPosition(r,c));
-//                System.out.println("");
             }
         }
 
-//        for (int i = 0; i < nv.length; i++)
-//            temp[i] = Arrays.copyOf(foo[i], foo[i].length);
        return tempBoard;
     }
 }

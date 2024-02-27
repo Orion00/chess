@@ -95,7 +95,7 @@ class GameServiceTest {
     @DisplayName("List Games - unauthorized")
     public void ListGamesUnauthorized() {
         String expectedException = "unauthorized";
-        DataAccessException actualException = assertThrows(DataAccessException.class,() -> gameService.ListGames(authWrong));
+        DataAccessException actualException = assertThrows(DataAccessException.class,() -> gameService.listGames(authWrong));
         assertEquals(expectedException,actualException.getMessage());
     }
 
@@ -108,7 +108,7 @@ class GameServiceTest {
         List<GameData> expected = new ArrayList<>();
         expected.add(insertedGame);
         expected.add(insertedGame2);
-        List<GameData> actual = Assertions.assertDoesNotThrow(() -> gameService.ListGames(auth));
+        List<GameData> actual = Assertions.assertDoesNotThrow(() -> gameService.listGames(auth));
         Assertions.assertEquals(expected,actual);
     }
 
@@ -124,7 +124,7 @@ class GameServiceTest {
 
         List<GameData> expected = new ArrayList<>();
         auth = Assertions.assertDoesNotThrow(() -> userService.register(user));
-        List<GameData> actual = Assertions.assertDoesNotThrow(() ->gameService.ListGames(auth));
+        List<GameData> actual = Assertions.assertDoesNotThrow(() ->gameService.listGames(auth));
         Assertions.assertEquals(expected,actual);
     }
 
