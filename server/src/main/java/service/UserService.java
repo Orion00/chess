@@ -39,7 +39,8 @@ public class UserService {
             UserData foundUser = userDAO.getUser(user);
             if (foundUser == null) {
                 // User doesn't exist
-                throw new DataAccessException("bad request");
+                throw new DataAccessException("unauthorized"); // Used to pass Test Case
+                //throw new DataAccessException("bad request");
             }
             if (!user.password().equals(foundUser.password())) {
                 throw new DataAccessException("unauthorized");

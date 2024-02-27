@@ -62,13 +62,15 @@ public class MemoryGameDAO implements GameDAO{
         GameData game = getGame(gameID);
         // Check if game exists
         if (game == null) {
-            throw new DataAccessException("GameID doesn't exist");
+            // GameID doesn't exist
+            throw new DataAccessException("bad request");
         }
         // Check if someone is already playing
         // TODO: See if this needs to check if same player is trying to join their own game
         if ((ClientColor == ChessGame.TeamColor.WHITE && game.whiteUsername() != null)
                 || (ClientColor == ChessGame.TeamColor.BLACK && game.blackUsername() != null)) {
-            throw new DataAccessException(ClientColor+" is already taken in this game");
+            // Color is already taken in this game
+            throw new DataAccessException("already taken");
         }
 
         GameData updatedGame;

@@ -48,12 +48,12 @@ public class GameService {
         try {
             AuthData user = getAuthUser(auth);
             ChessGame.TeamColor color;
-            if (data.playerColor().equals("WHITE")) {
+            if (data.playerColor() == null || data.playerColor().isEmpty()) {
+                color = null;
+            } else if (data.playerColor().equals("WHITE")) {
                 color = ChessGame.TeamColor.WHITE;
             } else if (data.playerColor().equals("BLACK")) {
                 color = ChessGame.TeamColor.BLACK;
-            } else if (data.playerColor().isEmpty()) {
-                color = null;
             } else {
                 throw new DataAccessException("Invalid color entered");
             }

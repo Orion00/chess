@@ -3,10 +3,7 @@ package handler;
 import com.google.gson.*;
 import dataAccess.DataAccessException;
 import exception.ResponseException;
-import model.AuthData;
-import model.GameData;
-import model.JoiningGameData;
-import model.UserData;
+import model.*;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
@@ -72,7 +69,7 @@ public class Handler {
         try {
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
             List<GameData> games = gameService.ListGames(new AuthData(authToken, null));
-            return gson.toJson(games);
+            return gson.toJson(new ListGameResult(games));
         } catch (DataAccessException i) {
             throw convertException(i);
         }
