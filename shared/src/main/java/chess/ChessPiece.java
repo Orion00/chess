@@ -203,33 +203,15 @@ public class ChessPiece {
             if (blockingPiece == null) {
                 // No piece blocking
                 if (horizontalIncrease == 0) {
-                    if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
-                        // Promotion
-                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
-                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                        legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    } else {
-                        // No Promotion
-                        legalMoves.add(new ChessMove(myPosition, newPosition, null));
-                    }
-
+                    // Check for promotion when moving forward unhindered
+                    legalMoves.addAll(checkForPromotion(legalMoves,myPosition,newPosition));
                 }
             } else if (blockingPiece.getTeamColor() == this.getTeamColor() && horizontalIncrease == 0) {
                 // Same team is blocking
             } else if (blockingPiece.getTeamColor() != this.getTeamColor() && abs(horizontalIncrease) == 1) {
                 // Enemy team is blocking (and can be taken)
-
-                if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
-                    // Promotion
-                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
-                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                } else {
-                    // No Promotion
-                    legalMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
+                // Check for promotion when taking pieces
+                legalMoves.addAll(checkForPromotion(legalMoves,myPosition,newPosition));
             }
         }
 
@@ -337,6 +319,21 @@ public class ChessPiece {
 
     public boolean getHasMoved() {
         return this.hasMoved;
+    }
+
+    private HashSet<ChessMove> checkForPromotion(HashSet<ChessMove> legalMoves, ChessPosition myPosition, ChessPosition newPosition) {
+        if (newPosition.getRow() == 8 | newPosition.getRow() == 1) {
+            // Promotion
+            legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+            legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+            legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+            legalMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+        } else {
+            // No Promotion
+            legalMoves.add(new ChessMove(myPosition, newPosition, null));
+        }
+
+        return legalMoves;
     }
 
 }
