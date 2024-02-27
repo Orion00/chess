@@ -57,7 +57,7 @@ public class Handler {
 
     public Object logout(Request req, Response res) throws ResponseException {
         try {
-            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+            String authToken = req.headers("Authorization");
             userService.logout(new AuthData(authToken, null));
             return "{}";
         } catch (DataAccessException i) {
@@ -67,10 +67,9 @@ public class Handler {
 
     public Object listGames(Request req, Response res) throws ResponseException {
         try {
-            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+            String authToken = req.headers("Authorization").trim();
             List<GameData> games = gameService.ListGames(new AuthData(authToken, null));
-            String h = gson.toJson(new ListGameResult(games));
-            return h;
+            return gson.toJson(new ListGameResult(games));
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -90,8 +89,7 @@ public class Handler {
 
     public Object joinGame(Request req, Response res) throws ResponseException {
         try {
-            Object r = req.headers();
-            String authToken = gson.fromJson(req.headers("Authorization"), String.class);
+            String authToken = req.headers("Authorization").trim();
 
             GsonBuilder builder = new GsonBuilder();
             builder.registerTypeAdapter(GameData.class, new JoiningGameDataDeserializer());

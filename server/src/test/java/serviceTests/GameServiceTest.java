@@ -141,7 +141,7 @@ class GameServiceTest {
     @Order(8)
     @DisplayName("Join Game - Incorrect GameID")
     public void JoinGameWrongID() {
-        String expectedException = "GameID doesn't exist";
+        String expectedException = "bad request";
         DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,new JoiningGameData("WHITE",404)));
         assertEquals(expectedException,actualException.getMessage());
     }
@@ -151,7 +151,7 @@ class GameServiceTest {
     @DisplayName("Join Game - Color Already Used")
     public void JoinGameColorAlreadyUsed() {
         Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth, new JoiningGameData("WHITE",insertedGame.gameID())));
-        String expectedException = "WHITE is already taken in this game";
+        String expectedException = "already taken";
         DataAccessException actualException = assertThrows(DataAccessException.class,() ->gameService.joinGame(auth,new JoiningGameData("WHITE",insertedGame.gameID())));
         assertEquals(expectedException,actualException.getMessage());
     }

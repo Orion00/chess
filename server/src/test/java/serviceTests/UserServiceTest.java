@@ -110,7 +110,7 @@ class UserServiceTest {
     @Order(4)
     @DisplayName("Login - User Doesn't Exist")
     public void LoginUserDoesntExist() {
-        String expectedException = "bad request";
+        String expectedException = "unauthorized";
         UserData userWrong = new UserData("EarnestWigglebee","4321",user.email());
         DataAccessException actualException = assertThrows(DataAccessException.class,() -> userService.login(userWrong));
         assertEquals(expectedException,actualException.getMessage());
