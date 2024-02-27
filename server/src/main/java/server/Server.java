@@ -98,6 +98,6 @@ public class Server {
 
     private Object handleHandlerResponse(Request req, Response res, Object handlerResponse) {
         res.status(200);
-        return handlerResponse.toString();
+        return handlerResponse;
     }
 }

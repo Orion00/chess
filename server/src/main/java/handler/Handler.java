@@ -69,7 +69,8 @@ public class Handler {
         try {
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
             List<GameData> games = gameService.ListGames(new AuthData(authToken, null));
-            return gson.toJson(new ListGameResult(games));
+            String h = gson.toJson(new ListGameResult(games));
+            return h;
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -89,6 +90,7 @@ public class Handler {
 
     public Object joinGame(Request req, Response res) throws ResponseException {
         try {
+            Object r = req.headers();
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
 
             GsonBuilder builder = new GsonBuilder();
