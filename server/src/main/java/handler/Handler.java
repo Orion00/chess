@@ -32,7 +32,7 @@ public class Handler {
     public Object clear(Request req, Response res) throws ResponseException {
         try {
             databaseService.clearApp();
-            return gson.toJson("{}");
+            return "{}";
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -62,7 +62,7 @@ public class Handler {
         try {
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
             userService.logout(new AuthData(authToken, null));
-            return gson.toJson("{}");
+            return "{}";
         } catch (DataAccessException i) {
             throw convertException(i);
         }
@@ -81,8 +81,9 @@ public class Handler {
     public Object createGame(Request req, Response res) throws ResponseException {
         try {
             String authToken = gson.fromJson(req.headers("Authorization"), String.class);
-            String gameName = gson.toJson(req.body());
-            GameData game = gameService.createGame(new AuthData(authToken,null), gameName);
+           GameData sentGame = gson.fromJson(req.body(), GameData.class);
+
+            GameData game = gameService.createGame(new AuthData(authToken,null), sentGame.gameName());
             return gson.toJson(game);
         } catch (DataAccessException i) {
             throw convertException(i);

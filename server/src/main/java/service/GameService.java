@@ -46,7 +46,7 @@ public class GameService {
     public void joinGame(AuthData auth, JoiningGameData data) throws DataAccessException{
         // Call Data Access Functions
         try {
-            getAuthUser(auth);
+            AuthData user = getAuthUser(auth);
             ChessGame.TeamColor color;
             if (data.playerColor().equals("WHITE")) {
                 color = ChessGame.TeamColor.WHITE;
@@ -57,7 +57,7 @@ public class GameService {
             } else {
                 throw new DataAccessException("Invalid color entered");
             }
-            gameDAO.addParticipant(data.gameID(),auth.username(), color);
+            gameDAO.addParticipant(data.gameID(),user.username(), color);
         } catch (DataAccessException i) {
             throw new DataAccessException(i.getMessage());
         }
