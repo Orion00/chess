@@ -103,21 +103,23 @@ public class ChessPiece {
                 break;
             }
             case QUEEN -> {
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,-1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,0,1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,0,-1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,0));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,0));
+                for (int row = -1; row < 2; row += 1) {
+                    for (int col = -1; col < 2; col += 1) {
+                        if (row == 0 && col == 0) {
+                            // Don't run if not moving anywhere
+                            continue;
+                        }
+                        legalMoves.addAll(recurKeepMoving(board, myPosition, myPosition, row, col));
+                    }
+                }
                 break;
             }
             case BISHOP -> {
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,1,-1));
-                legalMoves.addAll(recurKeepMoving(board,myPosition,myPosition,-1,-1));
+                for (int row = -1; row < 2; row += 2) {
+                    for (int col = -1; col < 2; col += 2) {
+                        legalMoves.addAll(recurKeepMoving(board, myPosition, myPosition, row, col));
+                    }
+                }
             }
             case KNIGHT -> {
                 List<List<Integer>> availableMoves = Arrays.asList(

@@ -197,18 +197,7 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         // Get same color king's position
-        ChessPosition myKingPosition = null;
-
-        foundKing:
-        for (int r = 1; r < 9; r++) {
-            for (int c = 1; c < 9; c++) {
-                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
-                if (temp != null && temp.getPieceType() == ChessPiece.PieceType.KING && temp.getTeamColor() == teamColor) {
-                    myKingPosition = new ChessPosition(r,c);
-                    break foundKing;
-                }
-            }
-        }
+        ChessPosition myKingPosition = findMyKing(teamColor);
 
         if (myKingPosition == null) {
             // If myKing's square is null, myKing isn't on the board, so can't be in check
@@ -259,18 +248,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-
-        ChessPosition myKingPosition = null;
-        foundKing:
-        for (int r = 1; r < 9; r++) {
-            for (int c = 1; c < 9; c++) {
-                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
-                if (temp != null && temp.getPieceType() == ChessPiece.PieceType.KING && temp.getTeamColor() == teamColor) {
-                    myKingPosition = new ChessPosition(r,c);
-                    break foundKing;
-                }
-            }
-        }
+        ChessPosition myKingPosition = findMyKing(teamColor);
 
         if (myKingPosition == null) {
             // If myKing's square is null, myKing isn't on the board, so can't be in stalemate
@@ -341,6 +319,22 @@ public class ChessGame {
                 piece.type = move.getPromotionPiece();
             }
         }
+    }
+
+    private ChessPosition findMyKing(TeamColor teamColor) {
+        ChessPosition myKingPosition;
+
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                ChessPiece temp = board.getPiece(new ChessPosition(r,c));
+                if (temp != null && temp.getPieceType() == ChessPiece.PieceType.KING && temp.getTeamColor() == teamColor) {
+                    myKingPosition = new ChessPosition(r,c);
+                    return myKingPosition;
+                }
+            }
+        }
+        // King not on the board
+        return null;
     }
 
 }
