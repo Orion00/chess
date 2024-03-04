@@ -11,20 +11,26 @@ import spark.*;
 
 public class Server {
 
-    private final Handler handler;
+    private Handler handler;
     public Server() {
         // Change to DB*DAO when swapping out interfaces
 //        AuthDAO authDAO = new MemoryAuthDAO();
 //        GameDAO gameDAO = new MemoryGameDAO();
 //        UserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new DBAuthDAO();
-        GameDAO gameDAO = new DBGameDAO();
-        UserDAO userDAO = new DBUserDAO();
-        DatabaseService databaseService = new DatabaseService(authDAO, gameDAO, userDAO);
-        GameService gameService = new GameService(authDAO, gameDAO);
-        UserService userService = new UserService(authDAO, userDAO);
 
-        this.handler = new Handler(databaseService, gameService, userService);
+        try {
+            AuthDAO authDAO = new DBAuthDAO();
+            GameDAO gameDAO = new DBGameDAO();
+            UserDAO userDAO = new DBUserDAO();
+            DatabaseService databaseService = new DatabaseService(authDAO, gameDAO, userDAO);
+            GameService gameService = new GameService(authDAO, gameDAO);
+            UserService userService = new UserService(authDAO, userDAO);
+            this.handler = new Handler(databaseService, gameService, userService);
+        } catch (DataAccessException i) {
+            System.out.printf("Unable to start server: %s%n", i.getMessage());
+            throw new RuntimeException("Unable to start server: ", i);
+        }
+
     }
 
     public int run(int desiredPort) {

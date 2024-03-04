@@ -169,7 +169,7 @@ class GameServiceTest {
     @Order(11)
     @DisplayName("Join Game - Authorized")
     public void JoinGameAuthorized() {
-        auth = authDAO.createAuth(user);
+        auth = Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
         Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,new JoiningGameData("WHITE",insertedGame.gameID())));
         Assertions.assertDoesNotThrow(() ->gameService.joinGame(auth,new JoiningGameData("BLACK",insertedGame.gameID())));
     }

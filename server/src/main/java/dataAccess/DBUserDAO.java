@@ -7,12 +7,8 @@ import java.sql.SQLException;
 
 public class DBUserDAO implements UserDAO {
 
-    public DBUserDAO() {
-        try {
-            configureDatabase();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
+    public DBUserDAO() throws DataAccessException {
+        configureDatabase();
     }
     @Override
     public UserData getUser(UserData user) {
