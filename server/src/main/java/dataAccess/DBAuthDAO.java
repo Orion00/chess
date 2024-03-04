@@ -17,6 +17,12 @@ public class DBAuthDAO implements AuthDAO {
     }
     @Override
     public AuthData getAuthUser(AuthData auth) {
+        if (auth == null || auth.authToken() == null || auth.username() == null
+                || auth.authToken().isEmpty() || auth.username().isEmpty() ) {
+            // No user found
+            return null;
+        }
+
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT authToken, username FROM auths WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -36,25 +42,31 @@ public class DBAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(UserData user) throws DataAccessException {
-        if (user == null || user.username() == null || user.email() == null || user.password() == null) {
+        if (user == null || user.username() == null || user.email() == null || user.password() == null
+            || user.username().isEmpty() || user.email().isEmpty() || user.password().isEmpty()) {
             // TODO: Figure out if this is the right message
             throw new DataAccessException("bad request");
         }
 
         String uuid = UUID.randomUUID().toString();
-        var statement = "INSERT INTO chess (authToken, username) VALUES (?, ?)";
+        var statement = "INSERT INTO auths (authToken, username) VALUES (?, ?)";
         executeUpdate(statement, uuid, user.username());
         return new AuthData(uuid, user.username());
     }
 
     @Override
     public void removeAuthUser(AuthData auth) throws DataAccessException {
-
+        if (getAuthUser(auth) == null) {
+            throw new DataAccessException("That AuthToken doesn't exist");
+        }
+        var statement = "DELETE FROM auths WHERE authToken = ?";
+        executeUpdate(statement, auth.authToken());
     }
 
     @Override
     public void clearAuths() throws DataAccessException {
-
+        var statement = "TRUNCATE TABLE auths";
+        executeUpdate(statement);
     }
 
     private AuthData readAuth(ResultSet rs) throws SQLException {
