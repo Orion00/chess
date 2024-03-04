@@ -26,4 +26,4 @@ replay_pid*
 
 .idea
 
-server/src/main/resources/db.properties
+db.properties
