@@ -36,8 +36,12 @@ public class DBAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(UserData user) throws DataAccessException {
-        String uuid = UUID.randomUUID().toString();
+        if (user == null || user.username() == null || user.email() == null || user.password() == null) {
+            // TODO: Figure out if this is the right message
+            throw new DataAccessException("bad request");
+        }
 
+        String uuid = UUID.randomUUID().toString();
         var statement = "INSERT INTO chess (authToken, username) VALUES (?, ?)";
         executeUpdate(statement, uuid, user.username());
         return new AuthData(uuid, user.username());

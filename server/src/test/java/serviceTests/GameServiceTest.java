@@ -20,9 +20,9 @@ class GameServiceTest {
     private static GameService gameService;
 
     private static UserService userService;
-    private static MemoryAuthDAO authDAO;
-    private static MemoryGameDAO gameDAO;
-    private static MemoryUserDAO userDAO;
+    private static AuthDAO authDAO;
+    private static GameDAO gameDAO;
+    private static UserDAO userDAO;
 
     private static UserData user;
     private static AuthData auth;
