@@ -8,6 +8,7 @@ import model.GameData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.sql.Types.NULL;
@@ -18,16 +19,70 @@ public class DBGameDAO implements GameDAO {
     }
     @Override
     public List<GameData> getGames() {
-        return null;
+        var result = new ArrayList<GameData>();
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID,whiteUsername, blackUsername, gameName, game FROM games";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGame(rs));
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            // Returns null if can't get game
+            return null;
+        }
+        return result;
+
     }
 
     @Override
     public GameData getGame(String gameName) {
+        if (gameName == null || gameName.isEmpty()) {
+            // No game found
+            return null;
+        }
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID,whiteUsername, blackUsername, gameName, game FROM games WHERE gameName=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, gameName);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            // Returns null if can't get game
+            return null;
+        }
         return null;
     }
 
     @Override
     public GameData getGame(Integer gameID) {
+        if (gameID == null) {
+            // No game found
+            return null;
+        }
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID,whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, String.valueOf(gameID));
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            // Returns null if can't get game
+            return null;
+        }
         return null;
     }
 
@@ -48,7 +103,8 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public void clearGames() throws DataAccessException {
-
+        var statement = "TRUNCATE TABLE games";
+        executeUpdate(statement);
     }
 
     private GameData readGame(ResultSet rs) throws SQLException {
