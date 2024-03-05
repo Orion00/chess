@@ -115,11 +115,13 @@ class AuthDAOTest {
     @DisplayName("Clear Auth - Correct")
     public void ClearAuthGood() {
         // Add some dummy data
-        Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
+        AuthData auth =Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
         Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
         Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
         Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
 
         assertDoesNotThrow(() -> authDAO.clearAuths());
+
+        assertNull(authDAO.getAuthUser(auth));
     }
 }

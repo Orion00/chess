@@ -1,9 +1,11 @@
 package dataAccess;
 
-import exception.ResponseException;
 import model.UserData;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static java.sql.Types.NULL;
 
 public class DBUserDAO implements UserDAO {
 
@@ -12,17 +14,71 @@ public class DBUserDAO implements UserDAO {
     }
     @Override
     public UserData getUser(UserData user) {
+        if (user == null || user.username() == null || user.email() == null || user.password() == null
+                || user.username().isEmpty() || user.email().isEmpty() || user.password().isEmpty()) {
+            // No user found
+            return null;
+        }
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, email, hpassword FROM users WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, user.username());
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readUser(rs);
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            // Returns null if can't get user
+            return null;
+        }
         return null;
     }
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-
+        if (user == null || user.username() == null || user.email() == null || user.password() == null
+                || user.username().isEmpty() || user.email().isEmpty() || user.password().isEmpty()) {
+            // TODO: Figure out if this is the right response
+            // User is missing fields so we can't create it
+            throw new DataAccessException("bad request");
+        }
+        if (getUser(user) != null) {
+            // Username already exists
+            throw new DataAccessException("already taken");
+        }
+        var statement = "INSERT INTO users (username, email, hpassword) VALUES (?, ?, ?)";
+        executeUpdate(statement, user.username(), user.email(), user.password());
     }
 
     @Override
     public void clearUsers() throws DataAccessException {
+        var statement = "TRUNCATE TABLE users";
+        executeUpdate(statement);
+    }
 
+    private UserData readUser(ResultSet rs) throws SQLException {
+        var username = rs.getString("username");
+        var email = rs.getString("email");
+        var hpassword = rs.getString("hpassword");
+        return new UserData(username, hpassword, email);
+    }
+
+    private void executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
     }
 
     // Has DBManager create the DB if needed
