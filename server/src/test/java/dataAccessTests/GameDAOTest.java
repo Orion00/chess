@@ -61,8 +61,8 @@ public class GameDAOTest {
         GameData requestedGame = assertDoesNotThrow(() -> gameDAO.getGame(createdGame.gameID()));
         GameData requestedGame2 = assertDoesNotThrow(() -> gameDAO.getGame(createdGame2.gameID()));
 
-        assertEquals(createdGame.gameID(), requestedGame.gameID());
-        assertEquals(createdGame2.gameID(), requestedGame2.gameID());
+        assertEquals(createdGame, requestedGame);
+        assertEquals(createdGame2, requestedGame2);
     }
 
     @Test
@@ -86,8 +86,8 @@ public class GameDAOTest {
         GameData requestedGame = assertDoesNotThrow(() -> gameDAO.getGame(createdGame.gameName()));
         GameData requestedGame2 = assertDoesNotThrow(() -> gameDAO.getGame(createdGame2.gameName()));
 
-        assertEquals(createdGame.gameID(), requestedGame.gameID());
-        assertEquals(createdGame2.gameID(), requestedGame2.gameID());
+        assertEquals(createdGame, requestedGame);
+        assertEquals(createdGame2, requestedGame2);
     }
 
     @Test
@@ -109,14 +109,8 @@ public class GameDAOTest {
         expected.add(createdGame);
         expected.add(createdGame2);
         List<GameData> actual = gameDAO.getGames();
-        assertEquals(expected.size(),actual.size());
 
-        for (int i = 0; i < expected.size(); i++) {
-            assertEquals(expected.get(i).gameID(), actual.get(i).gameID());
-            assertEquals(expected.get(i).gameName(), actual.get(i).gameName());
-            assertEquals(expected.get(i).whiteUsername(), actual.get(i).whiteUsername());
-            assertEquals(expected.get(i).blackUsername(), actual.get(i).blackUsername());
-        }
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -143,14 +137,41 @@ public class GameDAOTest {
         GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
         GameData actualGame2 = assertDoesNotThrow(() -> gameDAO.createGame(gameName2));
 
-        assertEquals(gameName, actualGame.gameName());
-        assertEquals(gameName2, actualGame2.gameName());
+        GameData expectedGame = new GameData(actualGame.gameID(), null,null,gameName,new ChessGame());
+        GameData expectedGame2 = new GameData(actualGame2.gameID(), null,null,gameName2,new ChessGame());
+
+        assertEquals(expectedGame, actualGame);
+        assertEquals(expectedGame2, actualGame2);
     }
 
     @Test
-    @Order(9)
+    @Order(10)
+    @DisplayName("Update Game - Bad Update")
+    public void UpdateGamesBadUpdate() {
+        GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
+
+        String expectedError = "bad request";
+        GameData editedGame = new GameData(actualGame.gameID()-100, "WhiteUsername","BlackUsername","UniqueGameName",actualGame.game());
+        DataAccessException actualError = assertThrows(DataAccessException.class,()-> gameDAO.updateGames(editedGame));
+        assertEquals(expectedError,actualError.getMessage());
+
+        String expectedError2 = "bad request";
+        GameData editedGame2 = new GameData(actualGame.gameID(), null,null,null,null);
+        DataAccessException actualError2 = assertThrows(DataAccessException.class,()-> gameDAO.updateGames(editedGame2));
+        assertEquals(expectedError2,actualError2.getMessage());
+
+        String expectedError3 = "bad request";
+        GameData editedGame3 = null;
+        DataAccessException actualError3 = assertThrows(DataAccessException.class,()-> gameDAO.updateGames(editedGame3));
+        assertEquals(expectedError3,actualError3.getMessage());
+
+    }
+
+    @Test
+    @Order(10)
     @DisplayName("Update Games - Works")
     public void UpdateGamesGood() {
+        // TODO: Refactor this to include making a move
         GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
         GameData editedGame = new GameData(actualGame.gameID(), "WhiteUsername","BlackUsername","UniqueGameName",actualGame.game());
         assertDoesNotThrow(()-> gameDAO.updateGames(editedGame));

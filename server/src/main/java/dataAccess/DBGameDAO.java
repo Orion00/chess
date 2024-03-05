@@ -129,11 +129,18 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public void updateGames(GameData updatedGame) throws DataAccessException {
+        if (updatedGame == null || updatedGame.gameName() == null || updatedGame.whiteUsername() == null ||
+                updatedGame.blackUsername() == null || updatedGame.game() == null) {
+            // Invalid input
+            throw new DataAccessException("bad request");
+        }
+
         GameData currentGame = getGame(updatedGame.gameID());
         if (currentGame == null) {
             // Game doesn't exist
             throw new DataAccessException("bad request");
         }
+
         var statement = "UPDATE games SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?";
         var json = new Gson().toJson(updatedGame.game());
         executeUpdate(statement, updatedGame.whiteUsername(),updatedGame.blackUsername(),updatedGame.gameName(),json,updatedGame.gameID());
