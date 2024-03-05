@@ -102,12 +102,41 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public void addParticipant(Integer gameID, String username, ChessGame.TeamColor clientColor) throws DataAccessException {
+        GameData currentGame = getGame(gameID);
+        // Check if game exists
+        if (currentGame == null) {
+            // GameID doesn't exist
+            throw new DataAccessException("bad request");
+        }
+        // Check if someone is already playing
+        if ((clientColor == ChessGame.TeamColor.WHITE && currentGame.whiteUsername() != null)
+                || (clientColor == ChessGame.TeamColor.BLACK && currentGame.blackUsername() != null)) {
+            // Color is already taken in this game
+            throw new DataAccessException("already taken");
+        }
 
+        GameData updatedGame;
+        if (clientColor == ChessGame.TeamColor.WHITE) {
+            updatedGame = new GameData(currentGame.gameID(), username, currentGame.blackUsername(), currentGame.gameName(), currentGame.game());
+        } else if (clientColor == ChessGame.TeamColor.BLACK) {
+            updatedGame = new GameData(currentGame.gameID(), currentGame.whiteUsername(), username, currentGame.gameName(), currentGame.game());
+        } else {
+            // Observer
+            updatedGame = currentGame;
+        }
+        updateGames(updatedGame);
     }
 
     @Override
-    public void updateGames(GameData updatedGame) {
-
+    public void updateGames(GameData updatedGame) throws DataAccessException {
+        GameData currentGame = getGame(updatedGame.gameID());
+        if (currentGame == null) {
+            // Game doesn't exist
+            throw new DataAccessException("bad request");
+        }
+        var statement = "UPDATE games SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?";
+        var json = new Gson().toJson(updatedGame.game());
+        executeUpdate(statement, updatedGame.whiteUsername(),updatedGame.blackUsername(),updatedGame.gameName(),json,updatedGame.gameID());
     }
 
     @Override

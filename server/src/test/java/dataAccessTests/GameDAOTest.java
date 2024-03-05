@@ -146,4 +146,17 @@ public class GameDAOTest {
         assertEquals(gameName, actualGame.gameName());
         assertEquals(gameName2, actualGame2.gameName());
     }
+
+    @Test
+    @Order(9)
+    @DisplayName("Update Games - Works")
+    public void UpdateGamesGood() {
+        GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
+        GameData editedGame = new GameData(actualGame.gameID(), "WhiteUsername","BlackUsername","UniqueGameName",actualGame.game());
+        assertDoesNotThrow(()-> gameDAO.updateGames(editedGame));
+
+        GameData requestedGame = assertDoesNotThrow(() -> gameDAO.getGame(editedGame.gameID()));
+        assertEquals(editedGame, requestedGame);
+
+    }
 }

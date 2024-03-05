@@ -80,7 +80,10 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void updateGames(GameData updatedGame) {
+    public void updateGames(GameData updatedGame) throws DataAccessException {
+        if (updatedGame == null) {
+            throw new DataAccessException("bad request");
+        }
         games.replace(updatedGame.gameID(), updatedGame);
     }
 
