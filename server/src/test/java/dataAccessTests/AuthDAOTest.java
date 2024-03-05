@@ -3,6 +3,7 @@ package dataAccessTests;
 import dataAccess.AuthDAO;
 import dataAccess.DBAuthDAO;
 import dataAccess.DataAccessException;
+import dataAccess.MemoryAuthDAO;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
@@ -19,10 +20,12 @@ class AuthDAOTest {
     @BeforeAll
     static void setUp() {
         try {
+
             authDAO = new DBAuthDAO();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+//        authDAO = new MemoryAuthDAO();
     }
 
     @BeforeEach

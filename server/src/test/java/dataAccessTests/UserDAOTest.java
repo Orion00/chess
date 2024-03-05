@@ -21,6 +21,7 @@ public class UserDAOTest {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+//        userDAO = new MemoryUserDAO();
     }
 
     @BeforeEach
