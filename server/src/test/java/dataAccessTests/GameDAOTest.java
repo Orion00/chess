@@ -78,19 +78,6 @@ public class GameDAOTest {
 
     @Test
     @Order(4)
-    @DisplayName("Get Games - Empty")
-    public void getGamesEmpty() {
-        GameData createdGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
-        GameData createdGame2 = assertDoesNotThrow(() -> gameDAO.createGame(gameName2));
-
-        GameData requestedGame = assertDoesNotThrow(() -> gameDAO.getGame(createdGame.gameName()));
-        GameData requestedGame2 = assertDoesNotThrow(() -> gameDAO.getGame(createdGame2.gameName()));
-
-        assertEquals(createdGame.gameID(), requestedGame.gameID());
-        assertEquals(createdGame2.gameID(), requestedGame2.gameID());
-    }
-
-    @Order(5)
     @DisplayName("Get Game by Name - Works")
     public void getGameNameCorrect() {
         GameData createdGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
@@ -101,6 +88,14 @@ public class GameDAOTest {
 
         assertEquals(createdGame.gameID(), requestedGame.gameID());
         assertEquals(createdGame2.gameID(), requestedGame2.gameID());
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Get Games - Empty")
+    public void getGamesEmpty() {
+        List<GameData> actual = gameDAO.getGames();
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -115,13 +110,36 @@ public class GameDAOTest {
         expected.add(createdGame2);
         List<GameData> actual = gameDAO.getGames();
         assertEquals(expected.size(),actual.size());
+
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).gameID(), actual.get(i).gameID());
+            assertEquals(expected.get(i).gameName(), actual.get(i).gameName());
+            assertEquals(expected.get(i).whiteUsername(), actual.get(i).whiteUsername());
+            assertEquals(expected.get(i).blackUsername(), actual.get(i).blackUsername());
+        }
     }
 
     @Test
     @Order(7)
+    @DisplayName("Create Game - Already Exists")
+    public void CreateGameAlreadyTaken() {
+        String expectedError = "bad request";
+        String expectedError2 = "already taken";
+        DataAccessException actualError = assertThrows(DataAccessException.class,() -> gameDAO.createGame(""));
+        assertEquals(expectedError, actualError.getMessage());
+
+        DataAccessException actualError2 = assertThrows(DataAccessException.class,() -> gameDAO.createGame(null));
+        assertEquals(expectedError, actualError2.getMessage());
+
+        assertDoesNotThrow(() -> gameDAO.createGame(gameName));
+        DataAccessException actualError3 = assertThrows(DataAccessException.class,() -> gameDAO.createGame(gameName));
+        assertEquals(expectedError2, actualError3.getMessage());
+    }
+
+    @Test
+    @Order(8)
     @DisplayName("Create Game - Works")
     public void CreateGameCorrect() {
-        // Should return null if there's no user
         GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
         GameData actualGame2 = assertDoesNotThrow(() -> gameDAO.createGame(gameName2));
 

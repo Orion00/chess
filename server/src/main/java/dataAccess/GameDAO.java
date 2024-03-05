@@ -12,5 +12,7 @@ public interface GameDAO {
     public GameData getGame(Integer gameID);
     public GameData createGame(String gameName) throws DataAccessException;
     public void addParticipant(Integer gameID, String username, ChessGame.TeamColor clientColor) throws DataAccessException;
+
+    public void updateGames(GameData updatedGame);
     void clearGames() throws DataAccessException;
 }

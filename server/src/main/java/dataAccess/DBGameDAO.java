@@ -88,7 +88,11 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public GameData createGame(String gameName) throws DataAccessException {
-        // TODO: Check using getGame if it exists
+        if (gameName == null || gameName.isEmpty()){
+            throw new DataAccessException("bad request");
+        } else if (getGame(gameName) != null) {
+            throw new DataAccessException("already taken");
+        }
         var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         var newGame = new ChessGame();
         var json = new Gson().toJson(newGame);
@@ -98,6 +102,11 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public void addParticipant(Integer gameID, String username, ChessGame.TeamColor clientColor) throws DataAccessException {
+
+    }
+
+    @Override
+    public void updateGames(GameData updatedGame) {
 
     }
 

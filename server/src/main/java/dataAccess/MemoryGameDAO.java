@@ -76,7 +76,12 @@ public class MemoryGameDAO implements GameDAO{
             // Observer
             updatedGame = game;
         }
-        games.replace(gameID, updatedGame);
+        updateGames(updatedGame);
+    }
+
+    @Override
+    public void updateGames(GameData updatedGame) {
+        games.replace(updatedGame.gameID(), updatedGame);
     }
 
     @Override
