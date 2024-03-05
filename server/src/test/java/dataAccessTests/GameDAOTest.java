@@ -2,9 +2,7 @@ package dataAccessTests;
 
 import chess.ChessGame;
 import dataAccess.*;
-import model.AuthData;
 import model.GameData;
-import model.UserData;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -178,6 +176,46 @@ public class GameDAOTest {
 
         GameData requestedGame = assertDoesNotThrow(() -> gameDAO.getGame(editedGame.gameID()));
         assertEquals(editedGame, requestedGame);
+    }
 
+    @Test
+    @Order(11)
+    @DisplayName("Add Participant - Bad Request")
+    public void AddParticipantBadUpdate() {
+        GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
+
+        String expectedError = "bad request";
+        DataAccessException actualError = assertThrows(DataAccessException.class,()-> gameDAO.addParticipant(actualGame.gameID()-100, "WhiteUsername", ChessGame.TeamColor.WHITE));
+        assertEquals(expectedError,actualError.getMessage());
+
+        String expectedError2 = "bad request";
+        DataAccessException actualError2 = assertThrows(DataAccessException.class,()-> gameDAO.addParticipant(actualGame.gameID(), null, ChessGame.TeamColor.WHITE));
+        assertEquals(expectedError2,actualError2.getMessage());
+
+        String expectedError3 = "already taken";
+        assertDoesNotThrow(()-> gameDAO.addParticipant(actualGame.gameID(), "WhiteUsername", ChessGame.TeamColor.WHITE));
+        DataAccessException actualError3 = assertThrows(DataAccessException.class,()-> gameDAO.addParticipant(actualGame.gameID(), "WhiteUsername", ChessGame.TeamColor.WHITE));
+        assertEquals(expectedError3,actualError3.getMessage());
+
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("Add Participant - Works")
+    public void AddParticipantGood() {
+        GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
+
+        assertDoesNotThrow(()-> gameDAO.addParticipant(actualGame.gameID(), "WhiteUsername", ChessGame.TeamColor.WHITE));
+        assertDoesNotThrow(()-> gameDAO.addParticipant(actualGame.gameID(), "BlackUsername", ChessGame.TeamColor.BLACK));
+        assertDoesNotThrow(()-> gameDAO.addParticipant(actualGame.gameID(), "Observer1", null));
+        assertDoesNotThrow(()-> gameDAO.addParticipant(actualGame.gameID(), "Observer2", null));
+        assertDoesNotThrow(()-> gameDAO.addParticipant(actualGame.gameID(), "Observer2", null));
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("Clear Games - Works")
+    public void ClearGamesGood() {
+        assertDoesNotThrow(()-> gameDAO.clearGames());
     }
 }

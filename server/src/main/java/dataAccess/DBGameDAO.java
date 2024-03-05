@@ -102,6 +102,10 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public void addParticipant(Integer gameID, String username, ChessGame.TeamColor clientColor) throws DataAccessException {
+        if (gameID == null || username == null) {
+            // Invalid input
+            throw new DataAccessException("bad request");
+        }
         GameData currentGame = getGame(gameID);
         // Check if game exists
         if (currentGame == null) {
@@ -129,8 +133,7 @@ public class DBGameDAO implements GameDAO {
 
     @Override
     public void updateGames(GameData updatedGame) throws DataAccessException {
-        if (updatedGame == null || updatedGame.gameName() == null || updatedGame.whiteUsername() == null ||
-                updatedGame.blackUsername() == null || updatedGame.game() == null) {
+        if (updatedGame == null || updatedGame.gameName() == null || updatedGame.game() == null) {
             // Invalid input
             throw new DataAccessException("bad request");
         }
