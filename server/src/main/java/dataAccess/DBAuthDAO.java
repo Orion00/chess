@@ -17,8 +17,7 @@ public class DBAuthDAO implements AuthDAO {
     }
     @Override
     public AuthData getAuthUser(AuthData auth) {
-        if (auth == null || auth.authToken() == null || auth.username() == null
-                || auth.authToken().isEmpty() || auth.username().isEmpty() ) {
+        if (auth == null || auth.authToken() == null || auth.authToken().isEmpty() ) {
             // No user found
             return null;
         }
@@ -42,8 +41,8 @@ public class DBAuthDAO implements AuthDAO {
 
     @Override
     public AuthData createAuth(UserData user) throws DataAccessException {
-        if (user == null || user.username() == null || user.email() == null || user.password() == null
-            || user.username().isEmpty() || user.email().isEmpty() || user.password().isEmpty()) {
+        if (user == null || user.username() == null || user.password() == null
+            || user.username().isEmpty() || user.password().isEmpty()) {
             // TODO: Figure out if this is the right message
             throw new DataAccessException("bad request");
         }

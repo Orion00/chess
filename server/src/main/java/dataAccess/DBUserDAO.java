@@ -1,6 +1,7 @@
 package dataAccess;
 
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,8 +15,8 @@ public class DBUserDAO implements UserDAO {
     }
     @Override
     public UserData getUser(UserData user) {
-        if (user == null || user.username() == null || user.email() == null || user.password() == null
-                || user.username().isEmpty() || user.email().isEmpty() || user.password().isEmpty()) {
+        if (user == null || user.username() == null || user.password() == null
+                || user.username().isEmpty() || user.password().isEmpty()) {
             // No user found
             return null;
         }
@@ -50,6 +51,7 @@ public class DBUserDAO implements UserDAO {
             throw new DataAccessException("already taken");
         }
         var statement = "INSERT INTO users (username, email, hpassword) VALUES (?, ?, ?)";
+        // Password has already been hashed
         executeUpdate(statement, user.username(), user.email(), user.password());
     }
 

@@ -3,6 +3,7 @@ package service;
 import dataAccess.*;
 import model.AuthData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.xml.crypto.Data;
 import java.util.Objects;
@@ -27,8 +28,13 @@ public class UserService {
                 // Empty username, password, or email
                 throw new DataAccessException("bad request");
             }
-            userDAO.createUser(user);
-            return authDAO.createAuth(user);
+
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            String hpassword = encoder.encode(user.password());
+            UserData huser = new UserData(user.username(), hpassword, user.email());
+
+            userDAO.createUser(huser);
+            return authDAO.createAuth(huser);
         } catch (DataAccessException i) {
             throw new DataAccessException(i.getMessage());
         }
@@ -42,7 +48,9 @@ public class UserService {
                 throw new DataAccessException("unauthorized"); // Used to pass Test Case
                 //throw new DataAccessException("bad request");
             }
-            if (!user.password().equals(foundUser.password())) {
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+            if (!encoder.matches(user.password(), foundUser.password())) {
                 throw new DataAccessException("unauthorized");
             }
             return authDAO.createAuth(user);
