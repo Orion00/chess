@@ -1,11 +1,12 @@
 package dataAccessTests;
 
-import chess.ChessGame;
+import chess.*;
 import dataAccess.*;
 import model.GameData;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -169,13 +170,35 @@ public class GameDAOTest {
     @Order(10)
     @DisplayName("Update Games - Works")
     public void UpdateGamesGood() {
-        // TODO: Refactor this to include making a move
         GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
+        ChessBoard editedBoard = new ChessBoard();
+        editedBoard.resetBoard();
+        actualGame.game().setBoard(editedBoard);
+
+        // Starting Board
         GameData editedGame = new GameData(actualGame.gameID(), "WhiteUsername","BlackUsername","UniqueGameName",actualGame.game());
         assertDoesNotThrow(()-> gameDAO.updateGames(editedGame));
 
+        // Change Board and Update
+        // Makes a move in the clunkiest way possible, but the only way I know how right now.
+        Collection<ChessMove> availMoves = editedGame.game().validMoves(new ChessPosition(2,1));
+        try {
+            for (ChessMove availMove : availMoves) {
+                editedGame.game().makeMove(availMove);
+                break;
+            }
+        } catch (InvalidMoveException i) {
+            System.out.println(i.getMessage());
+        }
+
+        assertDoesNotThrow(()-> gameDAO.updateGames(editedGame));
+
+
+
         GameData requestedGame = assertDoesNotThrow(() -> gameDAO.getGame(editedGame.gameID()));
         assertEquals(editedGame, requestedGame);
+
+
     }
 
     @Test
