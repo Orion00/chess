@@ -13,12 +13,12 @@ public class Server {
 
     private Handler handler;
     public Server() {
-        // Change to DB*DAO when swapping out interfaces
-//        AuthDAO authDAO = new MemoryAuthDAO();
-//        GameDAO gameDAO = new MemoryGameDAO();
-//        UserDAO userDAO = new MemoryUserDAO();
-
         try {
+//          Change to DB*DAO when swapping out interfaces
+//          AuthDAO authDAO = new MemoryAuthDAO();
+//          GameDAO gameDAO = new MemoryGameDAO();
+//          UserDAO userDAO = new MemoryUserDAO();
+
             AuthDAO authDAO = new DBAuthDAO();
             GameDAO gameDAO = new DBGameDAO();
             UserDAO userDAO = new DBUserDAO();
