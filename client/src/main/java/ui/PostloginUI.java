@@ -17,4 +17,9 @@ public class PostloginUI implements ClientUI {
             logout - Return to first window
             """;
     }
+
+    @Override
+    public String eval(String line) {
+        return null;
+    }
 }
