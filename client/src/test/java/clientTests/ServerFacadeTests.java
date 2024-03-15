@@ -13,6 +13,9 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+
+//        facade = new ServerFacade(port);
+        // TODO: Clear DB before each test
     }
 
     @AfterAll
