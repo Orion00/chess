@@ -1,7 +1,7 @@
-import chess.*;
+import client.ClientHandler;
 
 // Main creates a Client Handler using serverURL
-// Client Handler has a ServerFacade and handles switching UIs
+// Client Handler has a client.ServerFacade and handles switching UIs
 public class Main {
     public static void main(String[] args) {
 //        System.out.println("♕ 240 Chess Client");

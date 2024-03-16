@@ -1,13 +1,21 @@
 package ui;
 
+import client.ServerFacade;
 import exception.ResponseException;
+import model.AuthData;
+import model.UserData;
+
 
 import java.util.Arrays;
 
 public class PreloginUI implements  ClientUI{
     private final String serverUrl;
-    public PreloginUI(String url) {
+    private final ServerFacade server;
+    private String currentAuthToken;
+    public PreloginUI(String url, ServerFacade server) {
         serverUrl = url;
+        this.server = server;
+        this.currentAuthToken = null;
     }
 
     @Override
@@ -27,21 +35,42 @@ public class PreloginUI implements  ClientUI{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "signin" -> signIn(params);
-//                case "rescue" -> rescuePet(params);
-//                case "list" -> listPets();
-//                case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
-//                case "adoptall" -> adoptAllPets();
-//                case "quit" -> "quit";
-                case null -> "a";
-                default -> {
-                    help();
-                    throw new ResponseException(500, "Oops");
-                }
+                case "login" -> login(params);
+                case "register" -> register(params);
+                case "help" -> help();
+                default -> help();
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    private String login(String... params) throws ResponseException {
+        if (params.length < 2) {
+            throw new ResponseException(400, "Please enter a username and password");
+        } else if (params.length > 2) {
+            throw new ResponseException(400, "Too many inputs entered. Please enter only a username and password");
+        }
+        AuthData auth = server.login(params[0],params[1]);
+        String authToken = auth.authToken();
+        if (authToken == null) {
+            throw new ResponseException(403, "invalid login credentials");
+        }
+        this.currentAuthToken = authToken;
+        return "Login successful. Welcome "+params[0];
+    }
+
+    private String register(String... params) throws ResponseException{
+        if (params.length < 3) {
+            throw new ResponseException(400, "Please enter a username, password, and email");
+        } else if (params.length > 3) {
+            throw new ResponseException(400, "Too many inputs entered. Please enter only a username, password, and email");
+        }
+        AuthData auth = server.register(params[0],params[1],params[2]);
+/*        if (auth != null) {
+            throw new ResponseException(403, "invalid login credentials");
+        }*/
+        this.currentAuthToken = auth.authToken();
+        return "Registration successful. Welcome "+params[0];
     }
 }

@@ -1,3 +1,5 @@
+package client;
+
 import ui.PostloginUI;
 import ui.PreloginUI;
 
@@ -21,8 +23,8 @@ public class ClientHandler {
     public ClientHandler(String url) {
         serverUrl = url;
         server = new ServerFacade(url);
-        preloginUI = new PreloginUI(url);
-        postloginUI = new PostloginUI(url);
+        preloginUI = new PreloginUI(url, server);
+        postloginUI = new PostloginUI(url, server);
         this.state = State.LOGGEDOUT;
 
     }
@@ -52,6 +54,7 @@ public class ClientHandler {
             }
             }
             System.out.println();
+        System.out.println("Thanks for playing");
     }
 
     private void printPrompt() {

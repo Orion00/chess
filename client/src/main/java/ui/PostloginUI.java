@@ -1,9 +1,13 @@
 package ui;
 
+import client.ServerFacade;
+
 public class PostloginUI implements ClientUI {
     private final String serverUrl;
-    public PostloginUI(String url) {
+    private final ServerFacade server;
+    public PostloginUI(String url, ServerFacade server) {
         serverUrl = url;
+        this.server = server;
     }
 
     @Override
