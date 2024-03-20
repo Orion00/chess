@@ -12,6 +12,7 @@ public class ClientHandler {
     private ServerFacade server;
     private PreloginUI preloginUI;
     private PostloginUI postloginUI;
+    private String currentAuthToken;
 
     State state;
 
@@ -26,7 +27,7 @@ public class ClientHandler {
         preloginUI = new PreloginUI(url, server);
         postloginUI = new PostloginUI(url, server);
         this.state = State.LOGGEDOUT;
-
+        currentAuthToken = null;
     }
 
     public void run() {
@@ -43,11 +44,21 @@ public class ClientHandler {
             try {
                 if (state.equals(State.LOGGEDOUT)) {
                     result = preloginUI.eval(line);
+                    if (preloginUI.isAuthorized()) {
+                        state = State.LOGGEDIN;
+                        currentAuthToken = preloginUI.getAuthToken();
+                    }
                 } else if (state.equals(State.LOGGEDIN)) {
-                    result = postloginUI.eval(line);
+                    result = postloginUI.eval(currentAuthToken, line);
+                    if (!postloginUI.isAuthorized()) {
+                        state = State.LOGGEDOUT;
+                        currentAuthToken = null;
+                    }
                 }
                 //TODO: Add Game UI
-                System.out.print(SET_BG_COLOR_GREEN + result);
+                if (result != "quit") {
+                    System.out.print(SET_BG_COLOR_GREEN + result);
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -62,4 +73,7 @@ public class ClientHandler {
         System.out.print(">>> ");
     }
 
+    private boolean isAuthorized() {
+        return currentAuthToken != null;
+    }
 }

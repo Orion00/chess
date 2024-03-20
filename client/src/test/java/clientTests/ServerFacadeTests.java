@@ -1,5 +1,7 @@
 package clientTests;
 
+import client.ServerFacade;
+import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import server.Server;
 
@@ -13,9 +15,15 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        var url = "http://localhost:" + port;
+        ServerFacade facade = new ServerFacade(url);
 
-//        facade = new client.ServerFacade(port);
-        // TODO: Clear DB before each test
+        try {
+            facade.clear();
+        } catch (ResponseException i) {
+            System.out.print(i);
+        }
+
     }
 
     @AfterAll

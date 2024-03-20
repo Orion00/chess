@@ -3,7 +3,6 @@ package ui;
 import client.ServerFacade;
 import exception.ResponseException;
 import model.AuthData;
-import model.UserData;
 
 
 import java.util.Arrays;
@@ -11,7 +10,9 @@ import java.util.Arrays;
 public class PreloginUI implements  ClientUI{
     private final String serverUrl;
     private final ServerFacade server;
+
     private String currentAuthToken;
+
     public PreloginUI(String url, ServerFacade server) {
         serverUrl = url;
         this.server = server;
@@ -28,7 +29,6 @@ public class PreloginUI implements  ClientUI{
                 """;
     }
 
-    @Override
     public String eval(String line) {
         try {
             var tokens = line.toLowerCase().split(" ");
@@ -38,6 +38,7 @@ public class PreloginUI implements  ClientUI{
                 case "login" -> login(params);
                 case "register" -> register(params);
                 case "help" -> help();
+                case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -57,7 +58,7 @@ public class PreloginUI implements  ClientUI{
             throw new ResponseException(403, "invalid login credentials");
         }
         this.currentAuthToken = authToken;
-        return "Login successful. Welcome "+params[0];
+        return "Login successful. Welcome "+params[0]+".\nType \"help\" to view new commands";
     }
 
     private String register(String... params) throws ResponseException{
@@ -71,6 +72,12 @@ public class PreloginUI implements  ClientUI{
             throw new ResponseException(403, "invalid login credentials");
         }*/
         this.currentAuthToken = auth.authToken();
-        return "Registration successful. Welcome "+params[0];
+        return "Registration successful. Welcome "+params[0]+".\nType \"help\" to view new commands";
     }
+
+    public boolean isAuthorized() {
+        return currentAuthToken != null;
+    }
+
+    public String getAuthToken() { return currentAuthToken;}
 }
