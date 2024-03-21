@@ -10,10 +10,10 @@ import static ui.EscapeSequences.*;
 // This creates
 public class ClientHandler {
     private final String serverUrl;
-    private ServerFacade server;
-    private PreloginUI preloginUI;
-    private PostloginUI postloginUI;
-    private GameplayUI gameplayUI;
+    private final ServerFacade server;
+    private final PreloginUI preloginUI;
+    private final PostloginUI postloginUI;
+    private final GameplayUI gameplayUI;
     private String currentAuthToken;
     private Integer currentGameID;
 
@@ -50,21 +50,27 @@ public class ClientHandler {
                 if (state.equals(State.LOGGEDOUT)) {
                     result = preloginUI.eval(line);
                     if (preloginUI.isAuthorized()) {
+                        // SWITCH TO LOGGEDIN
                         state = State.LOGGEDIN;
                         currentAuthToken = preloginUI.getAuthToken();
                     }
                 } else if (state.equals(State.LOGGEDIN)) {
                     result = postloginUI.eval(currentAuthToken, line);
                     if (!postloginUI.isAuthorized()) {
+                        // Switch to LOGGEDOUT
                         state = State.LOGGEDOUT;
                         currentAuthToken = null;
                     }
                     if (postloginUI.getCurrentGameId() != null) {
+                        // Switch to GAME
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
+                        gameplayUI.setCurrentGameId(currentGameID);
                     }
                 } else if (state.equals(State.GAME)) {
-                    result =gameplayUI.eval(currentAuthToken, line);
+                    gameplayUI.print();
+                    result = "quit";
+//                    result =gameplayUI.eval(currentAuthToken,line);
                     // TODO: Add function to leave;
                 }
                 if (result != "quit") {
