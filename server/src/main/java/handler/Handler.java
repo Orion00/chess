@@ -67,7 +67,7 @@ public class Handler {
 
     public Object listGames(Request req, Response res) throws ResponseException {
         try {
-            String authToken = req.headers("Authorization").trim();
+            String authToken = req.headers("Authorization");
             List<GameData> games = gameService.listGames(new AuthData(authToken, null));
             return gson.toJson(new ListGameResult(games));
         } catch (DataAccessException i) {
