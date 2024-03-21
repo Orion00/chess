@@ -37,6 +37,7 @@ public class GameService {
             } else {
                 throw new DataAccessException("Game already exists");
             }
+//            return gameDAO.createGame(newGameName);
 
         } catch  (DataAccessException i){
             throw new DataAccessException(i.getMessage());

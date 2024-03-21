@@ -3,12 +3,14 @@ package clientTests;
 import client.ServerFacade;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
@@ -148,7 +150,69 @@ public class ServerFacadeTests {
         // Empty authToken
         ResponseException actualException3 = Assertions.assertThrows(ResponseException.class,() ->facade.listGames(""));
         assertEquals(expectedException, actualException3.getMessage());
+    }
 
+    @Test
+    public void listGamesPass() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+
+        Assertions.assertDoesNotThrow(() ->facade.listGames(authToken.authToken()));
+        Assertions.assertDoesNotThrow(() ->facade.listGames(authToken.authToken()));
+        Assertions.assertDoesNotThrow(() ->facade.listGames(authToken.authToken()));
+    }
+
+    @Test
+    public void createGameFail() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+
+        // Wrong authToken
+        String expectedException = "Failure: Unauthorized";
+        ResponseException actualException = Assertions.assertThrows(ResponseException.class,() ->facade.createGame(authToken.authToken()+"extraBaconBits","CoolGameName"));
+        assertEquals(expectedException, actualException.getMessage());
+
+        // Null authtoken
+        ResponseException actualException2 = Assertions.assertThrows(ResponseException.class,() ->facade.createGame(null,"CoolGameName"));
+        assertEquals(expectedException, actualException2.getMessage());
+
+        // Empty authToken
+        ResponseException actualException3 = Assertions.assertThrows(ResponseException.class,() ->facade.createGame("","CoolGameName"));
+        assertEquals(expectedException, actualException3.getMessage());
+
+        // Null gamename
+        String expectedException2 = "Failure: Bad Request";
+        ResponseException actualException4 = Assertions.assertThrows(ResponseException.class,() ->facade.createGame(authToken.authToken(), null));
+        assertEquals(expectedException2, actualException4.getMessage());
+
+        // Empty gamename
+        ResponseException actualException5 = Assertions.assertThrows(ResponseException.class,() ->facade.createGame(authToken.authToken(), ""));
+        assertEquals(expectedException2, actualException5.getMessage());
+    }
+
+    @Test
+    public void createGamePass() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+        String gameName = "CoolGameName";
+
+        Assertions.assertDoesNotThrow(() ->facade.createGame(authToken.authToken(), gameName));
+//        Assertions.assertDoesNotThrow(() ->facade.createGame(authToken.authToken(), gameName));
+//        Assertions.assertDoesNotThrow(() ->facade.createGame(authToken.authToken(), gameName));
+        Assertions.assertDoesNotThrow(() ->facade.listGames(authToken.authToken()));
+    }
+
+    @Test
+    public void clearPass() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+        String gameName = "CoolGameName";
+
+        Assertions.assertDoesNotThrow(() ->facade.createGame(authToken.authToken(), gameName));
+        List<GameData> returnedGames = Assertions.assertDoesNotThrow(() ->facade.listGames(authToken.authToken()));
+        assertEquals(1, returnedGames.size());
+
+        assertDoesNotThrow(()-> facade.clear());
+
+        // Make sure you can't logout or list games after clearing
+        assertThrows(ResponseException.class, ()-> facade.logout(authToken.authToken()));
+        assertThrows(ResponseException.class, ()-> facade.listGames(authToken.authToken()));
     }
 
 }
