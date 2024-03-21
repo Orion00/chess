@@ -23,7 +23,7 @@ public class ServerFacade {
     }
 
     public void clear() throws ResponseException {
-        var path = "/session";
+        var path = "/db";
         this.makeRequest("DELETE",path,null,null,null);
     }
     public AuthData login(String username, String password) throws ResponseException {
