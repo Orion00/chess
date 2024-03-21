@@ -101,4 +101,54 @@ public class ServerFacadeTests {
         Assertions.assertDoesNotThrow(() ->facade.login(user.username(), user.password()));
     }
 
+    @Test
+    public void logoutFail() {
+        String expectedException = "Failure: Unauthorized";
+        // Wrong authToken
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+        ResponseException actualException = Assertions.assertThrows(ResponseException.class,() ->facade.logout(authToken.authToken()+"extraBaconBits"));
+        assertEquals(expectedException, actualException.getMessage());
+
+        //No AuthToken
+        Assertions.assertDoesNotThrow(() ->facade.login(user.username(), user.password()));
+        ResponseException actualException2 = Assertions.assertThrows(ResponseException.class,() ->facade.logout(null));
+        assertEquals(expectedException, actualException2.getMessage());
+
+        //Empty AuthToken
+        Assertions.assertDoesNotThrow(() ->facade.login(user.username(), user.password()));
+        ResponseException actualException3 = Assertions.assertThrows(ResponseException.class,() ->facade.logout(""));
+        assertEquals(expectedException, actualException3.getMessage());
+    }
+
+    @Test
+    public void logoutPass() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+        Assertions.assertDoesNotThrow(() ->facade.logout(authToken.authToken()));
+
+        // Makes sure you can't use the authToken after logging out
+        Assertions.assertThrows(ResponseException.class,() ->facade.listGames(authToken.authToken()));
+        Assertions.assertThrows(ResponseException.class,() ->facade.logout(authToken.authToken()));
+
+    }
+
+    @Test
+    public void listGamesFail() {
+        String expectedException = "Failure: Unauthorized";
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+
+        // Wrong authToken
+        ResponseException actualException = Assertions.assertThrows(ResponseException.class,() ->facade.listGames(authToken.authToken()+"extraBaconBits"));
+        assertEquals(expectedException, actualException.getMessage());
+
+        // Null authtoken
+        String expectedException2 = "Failure: Server Error";
+        ResponseException actualException2 = Assertions.assertThrows(ResponseException.class,() ->facade.listGames(null));
+        assertEquals(expectedException2, actualException2.getMessage());
+
+        // Empty authToken
+        ResponseException actualException3 = Assertions.assertThrows(ResponseException.class,() ->facade.listGames(""));
+        assertEquals(expectedException, actualException3.getMessage());
+
+    }
+
 }
