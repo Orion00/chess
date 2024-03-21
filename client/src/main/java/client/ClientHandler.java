@@ -57,7 +57,7 @@ public class ClientHandler {
                 }
                 //TODO: Add Game UI
                 if (result != "quit") {
-                    System.out.print(SET_BG_COLOR_GREEN + result);
+                    System.out.print(result);
                 }
             } catch (Throwable e) {
                 var msg = e.toString();

@@ -16,7 +16,7 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
 //                ", gameName='" + gameName + '\'' +
 //                ", game=" + game +
 //                '}';
-        result.append("Game Name: ");
+        result.append("  Game Name: ");
         result.append(gameName);
         result.append("\n  Players: ");
         if (whiteUsername != null) {

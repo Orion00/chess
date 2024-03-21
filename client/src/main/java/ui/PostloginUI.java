@@ -2,7 +2,6 @@ package ui;
 
 import client.ServerFacade;
 import exception.ResponseException;
-import model.AuthData;
 import model.GameData;
 
 import java.text.MessageFormat;
@@ -13,6 +12,7 @@ public class PostloginUI implements ClientUI {
     private final String serverUrl;
     private final ServerFacade server;
     private boolean loggedIn;
+
     public PostloginUI(String url, ServerFacade server) {
         serverUrl = url;
         this.server = server;
@@ -47,17 +47,68 @@ public class PostloginUI implements ClientUI {
         if (params.length > 0) {
             throw new ResponseException(400, "Too many inputs entered. Try again.");
         }
+
         List<GameData> response = server.listGames(authToken);
 
         StringBuilder result = new StringBuilder();
-
         result.append("Current Games\n");
-        for (GameData game : response) {
-            result.append(game.prettyToString());
-//            result.append('\n');
+        if (response.isEmpty()) {
+            result.append("  No games currenly being played");
+            return result.toString();
         }
 
+        int gameIdIterator = 1;
+        for (GameData game : response) {
+            result.append("Game Number: ").append(gameIdIterator).append("\n");
+            result.append(game.prettyToString());
+            gameIdIterator++;
+//            result.append('\n');
+        }
         return result.toString();
+    }
+
+    private String join(String authToken, String... params) throws ResponseException{
+        if (params.length > 2) {
+            throw new ResponseException(400, "Too many inputs entered. Try again.");
+        } else if (params.length < 2) {
+            throw new ResponseException(400, "Please enter a game number and color to play as. Try again.");
+        }
+        String playerColor = params[1].toUpperCase();
+        if (!(playerColor.equals("WHITE") || playerColor.equals("BLACK"))) {
+            throw new ResponseException(400, "Please enter a valid color. Options are \"WHITE\" and \"BLACK\". Try again.");
+        }
+
+        List<GameData> currentGames = server.listGames(authToken);
+        int gameNumber = Integer.parseInt(params[0])-1; // Because user isn't using 0 based indexing
+
+        if (gameNumber < 0 || gameNumber > currentGames.size()-1) {
+            throw new ResponseException(400,"Invalid game number. Try again.");
+        }
+        Integer gameID = currentGames.get(gameNumber).gameID();
+
+        server.joinGame(authToken, playerColor, gameID);
+
+        return "Now joining game "+params[0]+".";
+    }
+
+    private String observe(String authToken, String... params) throws ResponseException{
+        if (params.length > 1) {
+            throw new ResponseException(400, "Too many inputs entered. Try again.");
+        } else if (params.length < 1) {
+            throw new ResponseException(400, "Please enter a game number. Try again.");
+        }
+
+        List<GameData> currentGames = server.listGames(authToken);
+        int gameNumber = Integer.parseInt(params[0])-1; // Because user isn't using 0 based indexing
+
+        if (gameNumber < 0 || gameNumber > currentGames.size()-1) {
+            throw new ResponseException(400,"Invalid game number. Try again.");
+        }
+        Integer gameID = currentGames.get(gameNumber).gameID();
+
+        server.joinGame(authToken, null, gameID);
+
+        return "Now observing game "+params[0]+".";
     }
 
     private String create(String authToken, String... params) throws ResponseException{
@@ -67,7 +118,8 @@ public class PostloginUI implements ClientUI {
             throw new ResponseException(400, "Too many inputs entered. Try again.");
         }
         int response = server.createGame(authToken, params[0]).gameID();
-        return MessageFormat.format("Game create successfully. Game ID is {0}", response);
+//        return MessageFormat.format("Game created successfully. Game ID is {0}", response);
+        return "Game created successfully. Use \"list\" to view it.";
     }
 
     public String eval(String authToken, String line) {
@@ -79,7 +131,8 @@ public class PostloginUI implements ClientUI {
                 case "logout" -> logout(authToken, params);
                 case "list" -> list(authToken, params);
                 case "create" -> create(authToken, params);
-//                case "register" -> register(params);
+                case "join" -> join(authToken, params);
+                case "observe" -> observe(authToken, params);
                 case "help" -> help();
                 default -> help();
             };

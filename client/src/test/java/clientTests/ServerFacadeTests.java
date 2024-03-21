@@ -199,6 +199,51 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void joinGameFail() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+        String gameName = "CoolGameName";
+
+        GameData gameId = Assertions.assertDoesNotThrow(() ->facade.createGame(authToken.authToken(), gameName));
+
+        String expectedError = "Failure: Unauthorized";
+
+        // Wrong authToken
+        ResponseException actualError = assertThrows(ResponseException.class, ()-> facade.joinGame(authToken.authToken()+"extraStuff","WHITE",gameId.gameID() ));
+        assertEquals(expectedError, actualError.getMessage());
+
+        // Empty authToken
+        ResponseException actualError2 = assertThrows(ResponseException.class, ()-> facade.joinGame("","WHITE",gameId.gameID() ));
+        assertEquals(expectedError, actualError2.getMessage());
+
+        // Null authToken
+        String expectedError2 = "Failure: Server Error";
+        ResponseException actualError3 = assertThrows(ResponseException.class, ()-> facade.joinGame(null,"WHITE",gameId.gameID() ));
+        assertEquals(expectedError2, actualError3.getMessage());
+
+        // Joining where someone has already joined
+        String expectedError3 = "Failure: Forbidden";
+        assertDoesNotThrow(()-> facade.joinGame(authToken.authToken(),"WHITE",gameId.gameID() ));
+        ResponseException actualError4 = assertThrows(ResponseException.class,()-> facade.joinGame(authToken.authToken(),"WHITE",gameId.gameID() ));
+        assertEquals(expectedError3, actualError4.getMessage());
+    }
+
+    @Test
+    public void joinGamePass() {
+        AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
+        String gameName = "CoolGameName";
+
+        GameData gameId = Assertions.assertDoesNotThrow(() ->facade.createGame(authToken.authToken(), gameName));
+
+        assertDoesNotThrow(()-> facade.joinGame(authToken.authToken(),"WHITE",gameId.gameID() ));
+        assertDoesNotThrow(()-> facade.joinGame(authToken.authToken(),"BLACK",gameId.gameID() ));
+
+        // Observer
+        assertDoesNotThrow(()-> facade.joinGame(authToken.authToken(),null,gameId.gameID() ));
+        assertDoesNotThrow(()-> facade.joinGame(authToken.authToken(),null,gameId.gameID() ));
+        assertDoesNotThrow(()-> facade.joinGame(authToken.authToken(),null,gameId.gameID() ));
+    }
+
+    @Test
     public void clearPass() {
         AuthData authToken = Assertions.assertDoesNotThrow(() ->facade.register(user.username(), user.password(), user.email()));
         String gameName = "CoolGameName";

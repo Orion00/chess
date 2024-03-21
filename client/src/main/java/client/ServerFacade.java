@@ -2,10 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.AuthData;
-import model.GameData;
-import model.ListGameResult;
-import model.UserData;
+import model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +50,12 @@ public class ServerFacade {
     public GameData createGame(String authToken,String gameName) throws ResponseException {
         var path = "/game";
         return this.makeRequest("POST", path, new GameData(101, null, null, gameName, null), authToken, GameData.class);
+    }
+
+    public void joinGame(String authToken,String playerColor, Integer gameID) throws ResponseException {
+        // TODO: Add some functionality to this
+        var path = "/game";
+        this.makeRequest("PUT", path, new JoiningGameData(playerColor, gameID), authToken, null);
     }
     private <T> T makeRequest(String method, String path, Object request, String header, Class<T> responseClass) throws ResponseException {
         try {
