@@ -143,9 +143,8 @@ public class ServerFacadeTests {
         assertEquals(expectedException, actualException.getMessage());
 
         // Null authtoken
-        String expectedException2 = "Failure: Server Error";
         ResponseException actualException2 = Assertions.assertThrows(ResponseException.class,() ->facade.listGames(null));
-        assertEquals(expectedException2, actualException2.getMessage());
+        assertEquals(expectedException, actualException2.getMessage());
 
         // Empty authToken
         ResponseException actualException3 = Assertions.assertThrows(ResponseException.class,() ->facade.listGames(""));
