@@ -1,5 +1,6 @@
 package client;
 
+import ui.GameplayUI;
 import ui.PostloginUI;
 import ui.PreloginUI;
 
@@ -12,7 +13,9 @@ public class ClientHandler {
     private ServerFacade server;
     private PreloginUI preloginUI;
     private PostloginUI postloginUI;
+    private GameplayUI gameplayUI;
     private String currentAuthToken;
+    private Integer currentGameID;
 
     State state;
 
@@ -26,8 +29,10 @@ public class ClientHandler {
         server = new ServerFacade(url);
         preloginUI = new PreloginUI(url, server);
         postloginUI = new PostloginUI(url, server);
+        gameplayUI = new GameplayUI(url, server);
         this.state = State.LOGGEDOUT;
         currentAuthToken = null;
+        currentGameID = null;
     }
 
     public void run() {
@@ -54,8 +59,14 @@ public class ClientHandler {
                         state = State.LOGGEDOUT;
                         currentAuthToken = null;
                     }
+                    if (postloginUI.getCurrentGameId() != null) {
+                        state = State.GAME;
+                        currentGameID = postloginUI.getCurrentGameId();
+                    }
+                } else if (state.equals(State.GAME)) {
+                    result =gameplayUI.eval(currentAuthToken, line);
+                    // TODO: Add function to leave;
                 }
-                //TODO: Add Game UI
                 if (result != "quit") {
                     System.out.print(result);
                 }

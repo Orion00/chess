@@ -13,10 +13,13 @@ public class PostloginUI implements ClientUI {
     private final ServerFacade server;
     private boolean loggedIn;
 
+    private Integer currentGameId;
+
     public PostloginUI(String url, ServerFacade server) {
         serverUrl = url;
         this.server = server;
         loggedIn = true;
+        currentGameId = null;
     }
 
     @Override
@@ -87,7 +90,7 @@ public class PostloginUI implements ClientUI {
         Integer gameID = currentGames.get(gameNumber).gameID();
 
         server.joinGame(authToken, playerColor, gameID);
-
+        currentGameId = gameID;
         return "Now joining game "+params[0]+".";
     }
 
@@ -107,7 +110,7 @@ public class PostloginUI implements ClientUI {
         Integer gameID = currentGames.get(gameNumber).gameID();
 
         server.joinGame(authToken, null, gameID);
-
+        currentGameId = gameID;
         return "Now observing game "+params[0]+".";
     }
 
@@ -143,5 +146,12 @@ public class PostloginUI implements ClientUI {
 
     public boolean isAuthorized() {
         return loggedIn;
+    }
+
+    public Integer getCurrentGameId() {
+        return currentGameId;
+    }
+    public void resetCurrentGameId() {
+        currentGameId = null;
     }
 }
