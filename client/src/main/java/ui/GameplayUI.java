@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessBoard;
 import client.ServerFacade;
 import exception.ResponseException;
 
@@ -21,7 +22,7 @@ public class GameplayUI implements ClientUI{
         serverUrl = url;
         this.server = server;
         currentGameId = null;
-        currentPlayerColor = "WHITE"; // TODO: Don't hardcode this
+//        currentPlayerColor = "WHITE"; // TODO: Don't hardcode this
     }
 
     @Override
@@ -62,9 +63,12 @@ public class GameplayUI implements ClientUI{
 
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
-        out.print(ERASE_SCREEN);
         BoardDrawer boardDrawer = new BoardDrawer();
-        boardDrawer.drawBoard(out, currentPlayerColor);
+//        boardDrawer.drawBoard(out, currentPlayerColor);
+        ChessBoard dummyBoard = new ChessBoard();
+        dummyBoard.resetBoard();
+        boardDrawer.drawBoard(out, "WHITE", dummyBoard);
+        boardDrawer.drawBoard(out, "BLACK", dummyBoard);
 
 
         return "Hello";
