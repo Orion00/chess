@@ -68,8 +68,7 @@ public class ClientHandler {
                         gameplayUI.setCurrentGameId(currentGameID);
                     }
                 } else if (state.equals(State.GAME)) {
-                    gameplayUI.print();
-                    result = "quit";
+                    result = gameplayUI.print();
 //                    result =gameplayUI.eval(currentAuthToken,line);
                     // TODO: Add function to leave;
                 }

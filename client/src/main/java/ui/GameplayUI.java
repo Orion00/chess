@@ -70,8 +70,7 @@ public class GameplayUI implements ClientUI{
         boardDrawer.drawBoard(out, "WHITE", dummyBoard);
         boardDrawer.drawBoard(out, "BLACK", dummyBoard);
 
-
-        return "Hello";
+        return "quit";
     }
 
 
