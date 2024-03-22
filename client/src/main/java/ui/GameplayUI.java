@@ -64,7 +64,7 @@ public class GameplayUI implements ClientUI{
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         BoardDrawer boardDrawer = new BoardDrawer();
-//        boardDrawer.drawBoard(out, currentPlayerColor);
+//        boardDrawer.drawBoard(out, currentPlayerColor, board);
         ChessBoard dummyBoard = new ChessBoard();
         dummyBoard.resetBoard();
         boardDrawer.drawBoard(out, "WHITE", dummyBoard);

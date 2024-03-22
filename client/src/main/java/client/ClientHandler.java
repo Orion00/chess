@@ -60,6 +60,7 @@ public class ClientHandler {
                         // Switch to LOGGEDOUT
                         state = State.LOGGEDOUT;
                         currentAuthToken = null;
+                        preloginUI.resetIsAuthorized();
                     }
                     if (postloginUI.getCurrentGameId() != null) {
                         // Switch to GAME

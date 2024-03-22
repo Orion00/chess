@@ -4,7 +4,6 @@ import client.ServerFacade;
 import exception.ResponseException;
 import model.GameData;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,7 +55,7 @@ public class PostloginUI implements ClientUI {
         StringBuilder result = new StringBuilder();
         result.append("Current Games\n");
         if (response.isEmpty()) {
-            result.append("  No games currenly being played");
+            result.append("  No games currently being played");
             return result.toString();
         }
 
@@ -70,42 +69,59 @@ public class PostloginUI implements ClientUI {
         return result.toString();
     }
 
-    private String join(String authToken, String... params) throws ResponseException{
+    private String join(String authToken, String... params) throws ResponseException {
         if (params.length > 2) {
             throw new ResponseException(400, "Too many inputs entered. Try again.");
         } else if (params.length < 2) {
             throw new ResponseException(400, "Please enter a game number and color to play as. Try again.");
         }
         String playerColor = params[1].toUpperCase();
+
+        if (playerColor.equals("W")) {
+            playerColor = "WHITE";
+        } else if (playerColor.equals("B")) {
+            playerColor = "BLACK";
+        }
         if (!(playerColor.equals("WHITE") || playerColor.equals("BLACK"))) {
             throw new ResponseException(400, "Please enter a valid color. Options are \"WHITE\" and \"BLACK\". Try again.");
         }
 
-        List<GameData> currentGames = server.listGames(authToken);
-        int gameNumber = Integer.parseInt(params[0])-1; // Because user isn't using 0 based indexing
-
-        if (gameNumber < 0 || gameNumber > currentGames.size()-1) {
-            throw new ResponseException(400,"Invalid game number. Try again.");
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]) - 1; // Because user isn't using 0 based indexing
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Please enter a valid number. Try again.");
         }
-        Integer gameID = currentGames.get(gameNumber).gameID();
 
+        List<GameData> currentGames = server.listGames(authToken);
+        if (gameNumber < 0 || gameNumber > currentGames.size() - 1) {
+            throw new ResponseException(400, "Invalid game number. Use \"list\" to view available game numbers. Try again.");
+        }
+
+        Integer gameID = currentGames.get(gameNumber).gameID();
         server.joinGame(authToken, playerColor, gameID);
         currentGameId = gameID;
-        return "Now joining game "+params[0]+".";
+        return "Now joining game " + params[0] + ".";
     }
 
-    private String observe(String authToken, String... params) throws ResponseException{
+    private String watch(String authToken, String... params) throws ResponseException{
         if (params.length > 1) {
             throw new ResponseException(400, "Too many inputs entered. Try again.");
         } else if (params.length < 1) {
             throw new ResponseException(400, "Please enter a game number. Try again.");
         }
 
-        List<GameData> currentGames = server.listGames(authToken);
-        int gameNumber = Integer.parseInt(params[0])-1; // Because user isn't using 0 based indexing
 
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]) - 1; // Because user isn't using 0 based indexing
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Please enter a valid number. Try again.");
+        }
+
+        List<GameData> currentGames = server.listGames(authToken);
         if (gameNumber < 0 || gameNumber > currentGames.size()-1) {
-            throw new ResponseException(400,"Invalid game number. Try again.");
+            throw new ResponseException(400, "Invalid game number. Use \"list\" to view available game numbers. Try again.");
         }
         Integer gameID = currentGames.get(gameNumber).gameID();
 
@@ -135,7 +151,8 @@ public class PostloginUI implements ClientUI {
                 case "list" -> list(authToken, params);
                 case "create" -> create(authToken, params);
                 case "join" -> join(authToken, params);
-                case "observe" -> observe(authToken, params);
+                case "watch" -> watch(authToken, params);
+                case "observe" -> watch(authToken, params);
                 case "help" -> help();
                 default -> help();
             };

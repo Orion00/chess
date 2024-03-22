@@ -80,4 +80,6 @@ public class PreloginUI implements  ClientUI{
     }
 
     public String getAuthToken() { return currentAuthToken;}
+
+    public void resetIsAuthorized() {currentAuthToken = null;}
 }
