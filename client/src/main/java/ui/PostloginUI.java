@@ -165,6 +165,8 @@ public class PostloginUI implements ClientUI {
         return loggedIn;
     }
 
+    public void setIsAuthorized() {loggedIn = true;}
+
     public Integer getCurrentGameId() {
         return currentGameId;
     }

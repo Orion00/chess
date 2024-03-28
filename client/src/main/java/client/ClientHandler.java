@@ -53,6 +53,7 @@ public class ClientHandler {
                         // SWITCH TO LOGGEDIN
                         state = State.LOGGEDIN;
                         currentAuthToken = preloginUI.getAuthToken();
+                        postloginUI.setIsAuthorized();
                     }
                 } else if (state.equals(State.LOGGEDIN)) {
                     result = postloginUI.eval(currentAuthToken, line);
