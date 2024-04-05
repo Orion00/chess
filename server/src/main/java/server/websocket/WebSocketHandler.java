@@ -17,14 +17,18 @@ public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws IOException {
+    public void onMessage(Session session, String message) throws ResponseException {
         UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
-        switch (userGameCommand.getCommandType()) {
-            case JOIN_PLAYER -> joinPlayer(userGameCommand, session);
-            case JOIN_OBSERVER -> joinObs(action.visitorName());
-            case MAKE_MOVE -> makeMove();
-            case LEAVE -> leave(userGameCommand.getUserName());
-            case RESIGN -> resign();
+        try {
+            switch (userGameCommand.getCommandType()) {
+                case JOIN_PLAYER -> joinPlayer(userGameCommand, session);
+                case JOIN_OBSERVER -> joinObs(action.visitorName());
+                case MAKE_MOVE -> makeMove();
+                case LEAVE -> leave(userGameCommand);
+                case RESIGN -> resign();
+            }
+        } catch (IOException i) {
+            throw new ResponseException(500, i.getMessage());
         }
     }
 
@@ -35,20 +39,11 @@ public class WebSocketHandler {
         connections.broadcast(userGameCommand.getAuthString(), notification);
     }
 
-    private void leave(String authToken) throws IOException {
-        connections.remove(visitorName);
-        var message = String.format("%s has left the game.", visitorName);
+    private void leave(UserGameCommand userGameCommand) throws IOException {
+        connections.remove(userGameCommand.getGameId(), userGameCommand.getAuthString());
+        var message = String.format("%s has left the game.", userGameCommand.getUserName());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(visitorName, notification);
+        connections.broadcast(userGameCommand.getAuthString(), notification);
     }
 
-    public void makeNoise(String petName, String sound) throws ResponseException {
-        try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new Notification(Notification.Type.NOISE, message);
-            connections.broadcast("", notification);
-        } catch (Exception ex) {
-            throw new ResponseException(500, ex.getMessage());
-        }
-    }
 }
