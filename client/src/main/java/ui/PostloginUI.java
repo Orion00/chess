@@ -153,6 +153,7 @@ public class PostloginUI implements ClientUI {
                 case "join" -> join(authToken, params);
                 case "watch" -> watch(authToken, params);
                 case "observe" -> watch(authToken, params);
+                case "quit" -> "quit";
                 case "help" -> help();
                 default -> help();
             };

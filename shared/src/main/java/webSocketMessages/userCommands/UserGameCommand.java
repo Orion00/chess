@@ -1,5 +1,7 @@
 package webSocketMessages.userCommands;
 
+import com.google.gson.Gson;
+
 import java.util.Objects;
 
 /**
@@ -10,8 +12,15 @@ import java.util.Objects;
  */
 public class UserGameCommand {
 
-    public UserGameCommand(String authToken) {
+    public UserGameCommand(String authToken, String userName) {
         this.authToken = authToken;
+    }
+
+    public UserGameCommand(String authToken, CommandType commandType, String userName, String gameId) {
+        this.authToken = authToken;
+        this.commandType = commandType;
+        this.userName = userName;
+        this.gameId = gameId;
     }
 
     public enum CommandType {
@@ -26,12 +35,30 @@ public class UserGameCommand {
 
     private final String authToken;
 
+    private String userName;
+
+    private String gameId;
+
+    private String color;
+
     public String getAuthString() {
         return authToken;
     }
 
     public CommandType getCommandType() {
         return this.commandType;
+    }
+
+    public String getUserName() {return this.userName;}
+
+    public String getGameId() {return this.gameId;}
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     @Override
@@ -47,5 +74,9 @@ public class UserGameCommand {
     @Override
     public int hashCode() {
         return Objects.hash(getCommandType(), getAuthString());
+    }
+
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

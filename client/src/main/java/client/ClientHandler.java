@@ -68,10 +68,11 @@ public class ClientHandler {
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
                         gameplayUI.setCurrentGameId(currentGameID);
+                        gameplayUI.setWebSocketHandler(new WebsocketHandler());
                     }
                 } else if (state.equals(State.GAME)) {
-                    result = gameplayUI.print();
-//                    result =gameplayUI.eval(currentAuthToken,line);
+//                    result = gameplayUI.print();
+                    result =gameplayUI.eval(currentAuthToken,line);
                     // TODO: Add function to leave;
                 }
                 if (result != "quit") {

@@ -45,10 +45,11 @@ public class GameplayUI implements ClientUI{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "print" -> print(params);
 //                case "print" -> print(authToken, params);
                 case "fail" -> throw new ResponseException(400,"You failed.");
+                case "quit" -> "quit";
                 case "help" -> help();
+                case "print" -> print(line);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -65,12 +66,13 @@ public class GameplayUI implements ClientUI{
 
         BoardDrawer boardDrawer = new BoardDrawer();
 //        boardDrawer.drawBoard(out, currentPlayerColor, board);
+//        TODO: Get board from websocket
         ChessBoard dummyBoard = new ChessBoard();
         dummyBoard.resetBoard();
         boardDrawer.drawBoard(out, "WHITE", dummyBoard);
         boardDrawer.drawBoard(out, "BLACK", dummyBoard);
 
-        return "quit";
+        return "";
     }
 
 
