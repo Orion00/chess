@@ -1,16 +1,18 @@
 package client;
 
+import client.websocket.NotificationHandler;
+import client.websocket.WebsocketFacade;
 import ui.GameplayUI;
 import ui.PostloginUI;
 import ui.PreloginUI;
 
+import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 // This creates
-public class ClientHandler {
+public class ClientHandler implements  NotificationHandler{
     private final String serverUrl;
-    private final ServerFacade server;
     private final PreloginUI preloginUI;
     private final PostloginUI postloginUI;
     private final GameplayUI gameplayUI;
@@ -19,6 +21,12 @@ public class ClientHandler {
 
     State state;
 
+    @Override
+    public void notify(String message) {
+        System.out.println(SET_TEXT_COLOR_RED + message);
+        printPrompt();
+    }
+
     private enum State {
         LOGGEDIN, LOGGEDOUT, GAME
     }
@@ -26,7 +34,7 @@ public class ClientHandler {
 
     public ClientHandler(String url) {
         serverUrl = url;
-        server = new ServerFacade(url);
+        ServerFacade server = new ServerFacade(url);
         preloginUI = new PreloginUI(url, server);
         postloginUI = new PostloginUI(url, server);
         gameplayUI = new GameplayUI(url, server);
@@ -68,14 +76,14 @@ public class ClientHandler {
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
                         gameplayUI.setCurrentGameId(currentGameID);
-                        gameplayUI.setWebSocketHandler(new WebsocketHandler());
+                        gameplayUI.setWebSocketFacade(new WebsocketFacade(serverUrl, this));
                     }
                 } else if (state.equals(State.GAME)) {
 //                    result = gameplayUI.print();
                     result =gameplayUI.eval(currentAuthToken,line);
                     // TODO: Add function to leave;
                 }
-                if (result != "quit") {
+                if (!Objects.equals(result, "quit")) {
                     System.out.print(result);
                 }
             } catch (Throwable e) {
@@ -92,7 +100,7 @@ public class ClientHandler {
         System.out.print(">>> ");
     }
 
-    private boolean isAuthorized() {
-        return currentAuthToken != null;
-    }
+//    private boolean isAuthorized() {
+//        return currentAuthToken != null;
+//    }
 }

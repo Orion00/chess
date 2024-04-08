@@ -2,6 +2,7 @@ package ui;
 
 import chess.ChessBoard;
 import client.ServerFacade;
+import client.websocket.WebsocketFacade;
 import exception.ResponseException;
 
 import java.io.PrintStream;
@@ -16,6 +17,7 @@ public class GameplayUI implements ClientUI{
 
     private Integer currentGameId;
     private String currentPlayerColor;
+    private WebsocketFacade websocketFacade;
 
 
     public GameplayUI(String url, ServerFacade server) {
@@ -82,5 +84,9 @@ public class GameplayUI implements ClientUI{
     }
     public void setCurrentPlayerColor(String currentPlayerColor) {
         this.currentPlayerColor = currentPlayerColor;
+    }
+
+    public void setWebSocketFacade(WebsocketFacade websocketFacade) {
+        this.websocketFacade = websocketFacade;
     }
 }
