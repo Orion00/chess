@@ -9,15 +9,13 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static ui.EscapeSequences.*;
-
 public class GameplayUI implements ClientUI{
     private final String serverUrl;
     private final ServerFacade server;
 
     private Integer currentGameId;
     private String currentPlayerColor;
-    private WebsocketFacade websocketFacade;
+    private WebsocketFacade ws;
 
 
     public GameplayUI(String url, ServerFacade server) {
@@ -35,8 +33,9 @@ public class GameplayUI implements ClientUI{
             print - Show your board
             move - Move selected piece
             show - Show available moves for selected piece
-            quit - Return to previous window. Can resume later
+            leave - Return to previous window. Can resume later
             resign - Surrender the game
+            quit - Close the program
             """;
     }
 
@@ -51,7 +50,7 @@ public class GameplayUI implements ClientUI{
                 case "fail" -> throw new ResponseException(400,"You failed.");
                 case "quit" -> "quit";
                 case "help" -> help();
-                case "print" -> print(line);
+                case "print" -> print(currentAuthToken, line);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -59,7 +58,7 @@ public class GameplayUI implements ClientUI{
         }
     }
 
-    public String print(String... params) throws ResponseException {
+    public String print(String authToken, String... params) throws ResponseException {
         if (params.length > 0) {
             throw new ResponseException(400, "Too many inputs entered");
         }
@@ -69,6 +68,7 @@ public class GameplayUI implements ClientUI{
         BoardDrawer boardDrawer = new BoardDrawer();
 //        boardDrawer.drawBoard(out, currentPlayerColor, board);
 //        TODO: Get board from websocket
+        String board = getCurrentGame(authToken);
         ChessBoard dummyBoard = new ChessBoard();
         dummyBoard.resetBoard();
         boardDrawer.drawBoard(out, "WHITE", dummyBoard);
@@ -77,7 +77,10 @@ public class GameplayUI implements ClientUI{
         return "";
     }
 
-
+    private String getCurrentGame(String authToken) throws ResponseException {
+        ws.getGame(authToken,currentGameId);
+        return "Orion need to change this";
+    }
 
     public void setCurrentGameId(Integer gameId) {
         currentGameId = gameId;
@@ -87,6 +90,6 @@ public class GameplayUI implements ClientUI{
     }
 
     public void setWebSocketFacade(WebsocketFacade websocketFacade) {
-        this.websocketFacade = websocketFacade;
+        this.ws = websocketFacade;
     }
 }

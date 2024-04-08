@@ -1,9 +1,9 @@
 package server;
 
-import com.google.gson.Gson;
 import dataAccess.*;
 import exception.ResponseException;
 import handler.Handler;
+import server.websocket.WebSocketHandler;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
@@ -12,6 +12,7 @@ import spark.*;
 public class Server {
 
     private Handler handler;
+    private final WebSocketHandler webSocketHandler;
     public Server() {
         try {
 //          Change to DB*DAO when swapping out interfaces
@@ -26,6 +27,7 @@ public class Server {
             GameService gameService = new GameService(authDAO, gameDAO);
             UserService userService = new UserService(authDAO, userDAO);
             this.handler = new Handler(databaseService, gameService, userService);
+            this.webSocketHandler = new WebSocketHandler();
         } catch (DataAccessException i) {
             System.out.printf("Unable to start server: %s%n", i.getMessage());
             throw new RuntimeException("Unable to start server: ", i);
@@ -37,6 +39,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/connect", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::delete);

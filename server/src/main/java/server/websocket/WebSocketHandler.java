@@ -24,11 +24,19 @@ public class WebSocketHandler {
 //                case JOIN_OBSERVER -> joinObs(action.visitorName());
 //                case MAKE_MOVE -> makeMove();
                 case LEAVE -> leave(userGameCommand);
+                case GET_GAME -> getGame(userGameCommand, session);
 //                case RESIGN -> resign();
             }
         } catch (IOException i) {
             throw new ResponseException(500, i.getMessage());
         }
+    }
+
+    private void getGame(UserGameCommand userGameCommand, Session session) {
+        // Access Handlers/DAOs
+        String game = "oops";
+        ServerMessage gameMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, game);
+//        connections.send();
     }
 
     private void joinPlayer(UserGameCommand userGameCommand, Session session) throws IOException {

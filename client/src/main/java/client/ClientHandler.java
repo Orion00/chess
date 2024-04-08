@@ -2,6 +2,7 @@ package client;
 
 import client.websocket.NotificationHandler;
 import client.websocket.WebsocketFacade;
+import exception.ResponseException;
 import ui.GameplayUI;
 import ui.PostloginUI;
 import ui.PreloginUI;
@@ -76,8 +77,8 @@ public class ClientHandler implements  NotificationHandler{
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
                         gameplayUI.setCurrentGameId(currentGameID);
-                        gameplayUI.setWebSocketFacade(new WebsocketFacade(serverUrl, this));
-                    }
+                        handleJoinWebsocket();
+                        }
                 } else if (state.equals(State.GAME)) {
 //                    result = gameplayUI.print();
                     result =gameplayUI.eval(currentAuthToken,line);
@@ -103,4 +104,9 @@ public class ClientHandler implements  NotificationHandler{
 //    private boolean isAuthorized() {
 //        return currentAuthToken != null;
 //    }
+
+    private void handleJoinWebsocket() throws ResponseException {
+        WebsocketFacade ws = new WebsocketFacade(serverUrl, this);
+        gameplayUI.setWebSocketFacade(ws);
+    }
 }
