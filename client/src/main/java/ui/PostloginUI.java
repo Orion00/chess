@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.ServerFacade;
 import exception.ResponseException;
 import model.GameData;
@@ -13,6 +14,8 @@ public class PostloginUI implements ClientUI {
     private boolean loggedIn;
 
     private Integer currentGameId;
+    private String currentColor;
+    private String currentUsername;
 
     public PostloginUI(String url, ServerFacade server) {
         serverUrl = url;
@@ -42,6 +45,7 @@ public class PostloginUI implements ClientUI {
             throw new ResponseException(403, "Something has gone horribly wrong");
         }
         loggedIn = false;
+        currentUsername = null;
         return "Logout successful. Type \"help\" to view new commands";
     }
 
@@ -101,6 +105,7 @@ public class PostloginUI implements ClientUI {
         Integer gameID = currentGames.get(gameNumber).gameID();
         server.joinGame(authToken, playerColor, gameID);
         currentGameId = gameID;
+        currentColor = playerColor;
         return "Now joining game " + params[0] + ".";
     }
 
@@ -171,7 +176,17 @@ public class PostloginUI implements ClientUI {
     public Integer getCurrentGameId() {
         return currentGameId;
     }
+
+    public ChessGame.TeamColor getCurrentColor() throws ResponseException{
+        return switch (currentColor) {
+            case "WHITE" -> ChessGame.TeamColor.WHITE;
+            case "BLACK" -> ChessGame.TeamColor.BLACK;
+            default -> throw new ResponseException(400, "Invalid color");
+        };
+    }
     public void resetCurrentGameId() {
         currentGameId = null;
     }
+
+    public String getCurrentUsername() { return currentUsername;}
 }

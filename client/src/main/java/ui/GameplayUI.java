@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import client.ServerFacade;
 import client.websocket.WebsocketFacade;
 import exception.ResponseException;
@@ -14,8 +15,9 @@ public class GameplayUI implements ClientUI{
     private final ServerFacade server;
 
     private Integer currentGameId;
-    private String currentPlayerColor;
+    private ChessGame.TeamColor currentPlayerColor;
     private WebsocketFacade ws;
+    private String currentUsername;
 
 
     public GameplayUI(String url, ServerFacade server) {
@@ -68,7 +70,7 @@ public class GameplayUI implements ClientUI{
         BoardDrawer boardDrawer = new BoardDrawer();
 //        boardDrawer.drawBoard(out, currentPlayerColor, board);
 //        TODO: Get board from websocket
-        String board = getCurrentGame(authToken);
+//        String board = getCurrentGame(authToken);
         ChessBoard dummyBoard = new ChessBoard();
         dummyBoard.resetBoard();
         boardDrawer.drawBoard(out, "WHITE", dummyBoard);
@@ -77,19 +79,21 @@ public class GameplayUI implements ClientUI{
         return "";
     }
 
-    private String getCurrentGame(String authToken) throws ResponseException {
-        ws.getGame(authToken,currentGameId);
-        return "Orion need to change this";
-    }
+//    private String getCurrentGame(String authToken) throws ResponseException {
+//        ws.getGame(authToken,currentGameId);
+//        return "Orion need to change this";
+//    }
 
     public void setCurrentGameId(Integer gameId) {
         currentGameId = gameId;
     }
-    public void setCurrentPlayerColor(String currentPlayerColor) {
+    public void setCurrentPlayerColor(ChessGame.TeamColor currentPlayerColor) {
         this.currentPlayerColor = currentPlayerColor;
     }
 
     public void setWebSocketFacade(WebsocketFacade websocketFacade) {
         this.ws = websocketFacade;
     }
+
+    public void setCurrentUsername(String currentUsername) { this.currentUsername = currentUsername;}
 }

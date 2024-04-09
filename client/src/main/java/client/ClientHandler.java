@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebsocketFacade;
 import exception.ResponseException;
@@ -19,6 +20,8 @@ public class ClientHandler implements  NotificationHandler{
     private final GameplayUI gameplayUI;
     private String currentAuthToken;
     private Integer currentGameID;
+    private ChessGame.TeamColor currentColor;
+    private String currentUsername;
 
     State state;
 
@@ -42,6 +45,8 @@ public class ClientHandler implements  NotificationHandler{
         this.state = State.LOGGEDOUT;
         currentAuthToken = null;
         currentGameID = null;
+        currentColor = null;
+        currentUsername = null;
     }
 
     public void run() {
@@ -76,8 +81,10 @@ public class ClientHandler implements  NotificationHandler{
                         // Switch to GAME
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
-                        gameplayUI.setCurrentGameId(currentGameID);
-                        handleJoinWebsocket();
+//                        gameplayUI.setCurrentGameId(currentGameID);
+//                        gameplayUI.setCurrentPlayerColor(postloginUI.getCurrentColor());
+//                        gameplayUI.setCurrentUsername(preloginUI.getCurrentUsername());
+                        handleJoinWebsocket(preloginUI.getAuthToken(), postloginUI.getCurrentGameId(), postloginUI.getCurrentColor(), preloginUI.getCurrentUsername());
                         }
                 } else if (state.equals(State.GAME)) {
 //                    result = gameplayUI.print();
@@ -105,8 +112,9 @@ public class ClientHandler implements  NotificationHandler{
 //        return currentAuthToken != null;
 //    }
 
-    private void handleJoinWebsocket() throws ResponseException {
+    private void handleJoinWebsocket(String currentAuthToken, Integer currentGameID, ChessGame.TeamColor currentColor, String currentUsername) throws ResponseException {
         WebsocketFacade ws = new WebsocketFacade(serverUrl, this);
         gameplayUI.setWebSocketFacade(ws);
+        ws.joinPlayer(currentAuthToken, currentGameID,currentColor,currentUsername);
     }
 }

@@ -12,6 +12,7 @@ public class PreloginUI implements  ClientUI{
     private final ServerFacade server;
 
     private String currentAuthToken;
+    private String currentUsername;
 
     public PreloginUI(String url, ServerFacade server) {
         serverUrl = url;
@@ -58,6 +59,7 @@ public class PreloginUI implements  ClientUI{
             throw new ResponseException(403, "invalid login credentials");
         }
         this.currentAuthToken = authToken;
+        this.currentUsername = params[0];
         return "Login successful. Welcome "+params[0]+".\nType \"help\" to view new commands";
     }
 
@@ -76,10 +78,11 @@ public class PreloginUI implements  ClientUI{
     }
 
     public boolean isAuthorized() {
-        return currentAuthToken != null;
+        return currentAuthToken != null && currentUsername != null;
     }
 
     public String getAuthToken() { return currentAuthToken;}
+    public String getCurrentUsername() {return currentUsername;}
 
-    public void resetIsAuthorized() {currentAuthToken = null;}
+    public void resetIsAuthorized() {currentAuthToken = null; currentUsername = null;}
 }

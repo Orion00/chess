@@ -46,4 +46,6 @@ public class ServerMessage {
     public String toString() {
         return new Gson().toJson(this);
     }
+
+    public String getMessage() {return this.toString();};
 }
