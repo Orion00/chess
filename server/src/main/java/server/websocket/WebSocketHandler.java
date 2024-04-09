@@ -5,26 +5,41 @@ import exception.ResponseException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import service.DatabaseService;
+import service.GameService;
+import service.UserService;
+import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.Leave;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
 
 @WebSocket
 public class WebSocketHandler {
+    private final DatabaseService databaseService;
+    private final GameService gameService;
+    private final UserService userService;
 
     private final ConnectionManager connections = new ConnectionManager();
 
+    public WebSocketHandler(DatabaseService databaseService, GameService gameService, UserService userService) {
+        this.databaseService = databaseService;
+        this.gameService = gameService;
+        this.userService = userService;
+    }
+
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws ResponseException {
-        UserGameCommand userGameCommand = new Gson().fromJson(message, UserGameCommand.class);
+        UserGameCommand userGameCommandGen = new Gson().fromJson(message, UserGameCommand.class);
+
         try {
-            switch (userGameCommand.getCommandType()) {
-                case JOIN_PLAYER -> joinPlayer(userGameCommand, session);
+            switch (userGameCommandGen.getCommandType()) {
+                case JOIN_PLAYER -> joinPlayer(userGameCommandGen, session);
 //                case JOIN_OBSERVER -> joinObs(action.visitorName());
 //                case MAKE_MOVE -> makeMove();
-                case LEAVE -> leave(userGameCommand);
-                case GET_GAME -> getGame(userGameCommand, session);
+                case LEAVE -> leave(userGameCommandGen);
 //                case RESIGN -> resign();
             }
         } catch (IOException i) {
@@ -32,25 +47,45 @@ public class WebSocketHandler {
         }
     }
 
-    private void getGame(UserGameCommand userGameCommand, Session session) {
-        // Access Handlers/DAOs
-        String game = "oops";
-        ServerMessage gameMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, game);
+    private UserGameCommand convertUserGameCommand(UserGameCommand userGameCommandGen) {
+        switch (userGameCommandGen.getCommandType()) {
+            case JOIN_PLAYER -> {
+                JoinPlayer userGameCommand = (JoinPlayer) userGameCommandGen;
+                userGameCommand.setGameID(userGameCommand.getGameID());
+                return userGameCommand;
+            };
+            case LEAVE -> return userGameCommandGen;
+//                case JOIN_OBSERVER -> joinObs(action.visitorName());
+////                case MAKE_MOVE -> makeMove();
+//            case LEAVE -> leave(userGameCommand);
+//            case GET_GAME -> getGame(userGameCommand, session);
+////                case RESIGN -> resign();
+//        }
+        }
+    }
+
+    private void joinPlayer(UserGameCommand userGameCommandGen, Session session) throws IOException {
+        JoinPlayer userGameCommand = (JoinPlayer) userGameCommandGen;
+        userGameCommand.setGameID(userGameCommand.getGameID());
+        connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
+        // TODO: Make a call to DAOs to get username
+        var message = String.format("%s has joined the game as %s", userGameCommand.getAuthString(), userGameCommand.getPlayerColor());
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
+
+        // TODO: Access DAOs to get most recent game, then Send LOAD_GAME
+
 //        connections.send();
     }
 
-    private void joinPlayer(UserGameCommand userGameCommand, Session session) throws IOException {
-        connections.add(userGameCommand.getGameId(), userGameCommand.getAuthString(), session);
-        var message = String.format("%s has joined the game as %s", userGameCommand.getUserName(), userGameCommand.getColor());
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(userGameCommand.getGameId(),userGameCommand.getAuthString(), notification);
-    }
-
-    private void leave(UserGameCommand userGameCommand) throws IOException {
-        connections.remove(userGameCommand.getGameId(), userGameCommand.getAuthString());
-        var message = String.format("%s has left the game.", userGameCommand.getUserName());
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(userGameCommand.getGameId(),userGameCommand.getAuthString(), notification);
+    private void leave(UserGameCommand userGameCommandGen) throws IOException {
+        Leave userGameCommand = (Leave) userGameCommandGen;
+        userGameCommand.setGameID(userGameCommand.getGameID()); //TODO: Figure out if this is necessary
+        connections.remove(userGameCommand.getGameID(), userGameCommand.getAuthString());
+        // TODO: Make a call to DAOs to get username
+        var message = String.format("%s has left the game.", userGameCommand.getAuthString());
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
     }
 
 }

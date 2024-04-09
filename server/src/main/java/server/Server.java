@@ -27,7 +27,7 @@ public class Server {
             GameService gameService = new GameService(authDAO, gameDAO);
             UserService userService = new UserService(authDAO, userDAO);
             this.handler = new Handler(databaseService, gameService, userService);
-            this.webSocketHandler = new WebSocketHandler();
+            this.webSocketHandler = new WebSocketHandler(databaseService, gameService, userService);
         } catch (DataAccessException i) {
             System.out.printf("Unable to start server: %s%n", i.getMessage());
             throw new RuntimeException("Unable to start server: ", i);
