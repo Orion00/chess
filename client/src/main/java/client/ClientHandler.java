@@ -3,11 +3,19 @@ package client;
 import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebsocketFacade;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import ui.GameplayUI;
 import ui.PostloginUI;
 import ui.PreloginUI;
+import webSocketMessages.serverMessages.Error;
+import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.Leave;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
@@ -27,8 +35,29 @@ public class ClientHandler implements  NotificationHandler{
 
     @Override
     public void notify(String message) {
-        System.out.println(SET_TEXT_COLOR_RED + message);
-        printPrompt();
+        System.out.println(SET_TEXT_COLOR_RED);
+        ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+        try {
+            switch (serverMessage.getServerMessageType()) {
+                case LOAD_GAME -> {
+                    LoadGame userGameCommand = new Gson().fromJson(message, LoadGame.class);
+                    gameplayUI.printBoard(userGameCommand.getGame().getBoard());
+                }
+                case NOTIFICATION -> {
+                    Notification userGameCommand = new Gson().fromJson(message, Notification.class);
+                    System.out.print(userGameCommand.getMessage());
+                } case ERROR -> {
+                    Error userGameCommand = new Gson().fromJson(message, Error.class);
+                    System.out.print(userGameCommand.getErrorMessage());
+                }
+            }
+        } catch (ResponseException i) {
+            System.out.print(i.getMessage());
+        } finally {
+            System.out.print(RESET_TEXT_COLOR);
+            printPrompt();
+        }
+
     }
 
     private enum State {

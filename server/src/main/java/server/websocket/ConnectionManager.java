@@ -1,5 +1,6 @@
 package server.websocket;
 
+import model.GameData;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -14,7 +15,12 @@ public class ConnectionManager {
 
     public void add(Integer gameId, String authToken, Session session) throws IOException {
         ConcurrentHashMap<String, Connection> innerMap = getInnerMap(gameId);
+        if (innerMap == null) {
+            //gameId doesn't exist yet
+            innerMap = new ConcurrentHashMap<String, Connection>();
+        }
         innerMap.put(authToken, new Connection(authToken, session));
+        connections.put(gameId, innerMap);
     }
 
     public void remove(Integer gameId, String authToken) throws IOException {
@@ -42,11 +48,30 @@ public class ConnectionManager {
         }
     }
 
+    public void send(Integer gameId,String authToken, ServerMessage notification) throws IOException {
+        var removeList = new ArrayList<Connection>();
+        ConcurrentHashMap<String, Connection> innerMap = getInnerMap(gameId);
+        for (var c : innerMap.values()) {
+            if (c.session.isOpen()) {
+                if (c.authToken.equals(authToken)) {
+                    c.send(notification.toString());
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var d : removeList) {
+            connections.remove(d.authToken);
+        }
+    }
+
     private ConcurrentHashMap<String, Connection> getInnerMap(Integer gameId) throws IOException {
         ConcurrentHashMap<String, Connection> innerMap = connections.get(gameId);
-        if (innerMap == null) {
-            throw new IOException("gameID doesn't exist");
-        }
+//        if (innerMap == null) {
+//            throw new IOException("gameID doesn't exist");
+//        }
         return innerMap;
     }
 }

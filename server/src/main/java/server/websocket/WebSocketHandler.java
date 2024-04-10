@@ -1,13 +1,17 @@
 package server.websocket;
 
 import com.google.gson.Gson;
+import dataAccess.DataAccessException;
 import exception.ResponseException;
+import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinPlayer;
@@ -15,6 +19,7 @@ import webSocketMessages.userCommands.Leave;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebSocket
 public class WebSocketHandler {
@@ -30,44 +35,29 @@ public class WebSocketHandler {
         this.userService = userService;
     }
 
-//    @OnWebSocketMessage
-//    public void onMessage(Session session, String message) throws ResponseException {
-//        UserGameCommand userGameCommandGen = new Gson().fromJson(message, UserGameCommand.class);
-//
-//        try {
-//            switch (userGameCommandGen.getCommandType()) {
-//                case JOIN_PLAYER -> joinPlayer(userGameCommandGen, session);
-////                case JOIN_OBSERVER -> joinObs(action.visitorName());
-////                case MAKE_MOVE -> makeMove();
-//                case LEAVE -> leave(userGameCommandGen);
-////                case RESIGN -> resign();
-//            }
-//        } catch (IOException i) {
-//            throw new ResponseException(500, i.getMessage());
-//        }
-//    }
-@OnWebSocketMessage
-public void onMessage(Session session, String message) throws ResponseException {
-    UserGameCommand userGameCommandGen = new Gson().fromJson(message, UserGameCommand.class);
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws ResponseException {
+        UserGameCommand userGameCommandGen = new Gson().fromJson(message, UserGameCommand.class);
 
-    try {
-        processUserGameCommand(userGameCommandGen, session);
-    } catch (IOException i) {
-        throw new ResponseException(500, i.getMessage());
-    }
-}
-
-    private void processUserGameCommand(UserGameCommand userGameCommand, Session session) throws IOException {
-        if (userGameCommand instanceof JoinPlayer) {
-            JoinPlayer joinGameCommand = (JoinPlayer) userGameCommand;
-            // Now you can access additional data specific to JoinGame using joinGameCommand
-            joinPlayer(joinGameCommand, session);
-        } else if (userGameCommand instanceof Leave) {
-            leave((Leave) userGameCommand);
-        } else {
-            // Handle other command types if needed
+        try {
+            switch (userGameCommandGen.getCommandType()) {
+                case JOIN_PLAYER -> {
+                    JoinPlayer userGameCommand = new Gson().fromJson(message, JoinPlayer.class);
+                    joinPlayer(userGameCommand, session);
+                }
+                case LEAVE -> {
+                    Leave userGameCommand = new Gson().fromJson(message, Leave.class);
+                    leave(userGameCommand);
+                }
+//                case JOIN_OBSERVER -> joinObs(action.visitorName());
+//                case MAKE_MOVE -> makeMove();
+//                case RESIGN -> resign();
+            }
+        } catch (IOException i) {
+            throw new ResponseException(500, i.getMessage());
         }
     }
+//
 
 //    private UserGameCommand convertUserGameCommand(UserGameCommand userGameCommandGen) {
 //        switch (userGameCommandGen.getCommandType()) {
@@ -87,20 +77,32 @@ public void onMessage(Session session, String message) throws ResponseException 
 //        }
 //    }
 
-    private void joinPlayer(UserGameCommand userGameCommandGen, Session session) throws IOException {
-        JoinPlayer userGameCommand = (JoinPlayer) userGameCommandGen;
-        var a = "a";
-        userGameCommand.setGameID(userGameCommand.getGameID()); //TODO: Figure out if this is needed
-        connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
-        // TODO: Make a call to DAOs to get username
-        var message = String.format("%s has joined the game as %s", userGameCommand.getAuthString(), userGameCommand.getPlayerColor());
-        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
-        notification.setMessage(message);
-        connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
+    private void joinPlayer(JoinPlayer userGameCommand, Session session) throws ResponseException {
+        try {
+       //     userGameCommand.setGameID(userGameCommand.getGameID());
+            connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
-        // TODO: Access DAOs to get most recent game, then Send LOAD_GAME
 
-//        connections.send();
+            var message = String.format("%s has joined the game as %s", userGameCommand.getAuthString(), userGameCommand.getPlayerColor());
+            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+            notification.setMessage(message);
+            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
+
+            // TODO: Access DAOs to get most recent game, then Send LOAD_GAME
+
+            List<GameData> games = gameService.listGames(new AuthData(userGameCommand.getAuthString(), null));
+            for (GameData game : games) {
+                if (game.gameID() == userGameCommand.getGameID()) {
+                    LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+                    loadGame.setGame(game.getGame());
+                    connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
+                    return;
+                }
+            }
+            throw new ResponseException(500, "Can't find game to join");
+        } catch (IOException | DataAccessException i) {
+            throw new ResponseException(500, i.getMessage());
+        }
     }
 
     private void leave(UserGameCommand userGameCommandGen) throws IOException {

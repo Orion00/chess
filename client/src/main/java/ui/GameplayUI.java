@@ -5,6 +5,7 @@ import chess.ChessGame;
 import client.ServerFacade;
 import client.websocket.WebsocketFacade;
 import exception.ResponseException;
+import model.GameData;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +19,7 @@ public class GameplayUI implements ClientUI{
     private ChessGame.TeamColor currentPlayerColor;
     private WebsocketFacade ws;
     private String currentUsername;
+    private ChessBoard currentBoard;
 
 
     public GameplayUI(String url, ServerFacade server) {
@@ -61,20 +63,11 @@ public class GameplayUI implements ClientUI{
     }
 
     public String print(String authToken, String... params) throws ResponseException {
-        if (params.length > 0) {
+        if (params.length > 1) {
             throw new ResponseException(400, "Too many inputs entered");
         }
 
-        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-
-        BoardDrawer boardDrawer = new BoardDrawer();
-//        boardDrawer.drawBoard(out, currentPlayerColor, board);
-//        TODO: Get board from websocket
-//        String board = getCurrentGame(authToken);
-        ChessBoard dummyBoard = new ChessBoard();
-        dummyBoard.resetBoard();
-        boardDrawer.drawBoard(out, "WHITE", dummyBoard);
-        boardDrawer.drawBoard(out, "BLACK", dummyBoard);
+        printBoard(currentBoard);
 
         return "";
     }
@@ -96,4 +89,18 @@ public class GameplayUI implements ClientUI{
     }
 
     public void setCurrentUsername(String currentUsername) { this.currentUsername = currentUsername;}
+
+    public void printBoard(ChessBoard board) throws ResponseException {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+
+        BoardDrawer boardDrawer = new BoardDrawer();
+//        boardDrawer.drawBoard(out, currentPlayerColor, board);
+//        TODO: Get board from websocket
+//        String board = getCurrentGame(authToken);
+//        ChessBoard dummyBoard = new ChessBoard();
+//        dummyBoard.resetBoard();
+        boardDrawer.drawBoard(out, String.valueOf(currentPlayerColor), board);
+        currentBoard = board;
+//        boardDrawer.drawBoard(out, "BLACK", dummyBoard);
+    }
 }
