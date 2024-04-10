@@ -51,12 +51,12 @@ public class ServerFacade {
 
     public GameData createGame(String authToken,String gameName) throws ResponseException {
         var path = "/game";
-        ChessGame chessGame = new ChessGame();
-        ChessBoard chessBoard = new ChessBoard();
-        chessBoard.resetBoard();
-        chessGame.setBoard(chessBoard);
-        chessGame.setTeamTurn(ChessGame.TeamColor.WHITE);
-        return this.makeRequest("POST", path, new GameData(101, null, null, gameName, chessGame), authToken, GameData.class);
+//        ChessGame chessGame = new ChessGame();
+//        ChessBoard chessBoard = new ChessBoard();
+//        chessBoard.resetBoard();
+//        chessGame.setBoard(chessBoard);
+//        chessGame.setTeamTurn(ChessGame.TeamColor.WHITE);
+        return this.makeRequest("POST", path, new GameData(101, null, null, gameName, null), authToken, GameData.class);
     }
 
     public void joinGame(String authToken,String playerColor, Integer gameID) throws ResponseException {

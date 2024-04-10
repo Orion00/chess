@@ -29,7 +29,6 @@ public class BoardDrawer {
             drawHeaders(out);
 
             resetBGAndTextCol(out);
-            out.println();
         } catch (ResponseException i) {
             resetBGAndTextCol(out);
             throw i;

@@ -5,7 +5,6 @@ import chess.ChessGame;
 import client.ServerFacade;
 import client.websocket.WebsocketFacade;
 import exception.ResponseException;
-import model.GameData;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -66,16 +65,10 @@ public class GameplayUI implements ClientUI{
         if (params.length > 1) {
             throw new ResponseException(400, "Too many inputs entered");
         }
-
-        printBoard(currentBoard);
+        printAndUpdateBoard(currentBoard);
 
         return "";
     }
-
-//    private String getCurrentGame(String authToken) throws ResponseException {
-//        ws.getGame(authToken,currentGameId);
-//        return "Orion need to change this";
-//    }
 
     public void setCurrentGameId(Integer gameId) {
         currentGameId = gameId;
@@ -90,17 +83,10 @@ public class GameplayUI implements ClientUI{
 
     public void setCurrentUsername(String currentUsername) { this.currentUsername = currentUsername;}
 
-    public void printBoard(ChessBoard board) throws ResponseException {
+    public void printAndUpdateBoard(ChessBoard board) throws ResponseException {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-
         BoardDrawer boardDrawer = new BoardDrawer();
-//        boardDrawer.drawBoard(out, currentPlayerColor, board);
-//        TODO: Get board from websocket
-//        String board = getCurrentGame(authToken);
-//        ChessBoard dummyBoard = new ChessBoard();
-//        dummyBoard.resetBoard();
         boardDrawer.drawBoard(out, String.valueOf(currentPlayerColor), board);
         currentBoard = board;
-//        boardDrawer.drawBoard(out, "BLACK", dummyBoard);
     }
 }

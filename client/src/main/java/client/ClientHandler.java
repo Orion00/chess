@@ -12,16 +12,13 @@ import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 // This creates
-public class ClientHandler implements  NotificationHandler{
+public class ClientHandler implements  NotificationHandler {
     private final String serverUrl;
     private final PreloginUI preloginUI;
     private final PostloginUI postloginUI;
@@ -41,7 +38,7 @@ public class ClientHandler implements  NotificationHandler{
             switch (serverMessage.getServerMessageType()) {
                 case LOAD_GAME -> {
                     LoadGame userGameCommand = new Gson().fromJson(message, LoadGame.class);
-                    gameplayUI.printBoard(userGameCommand.getGame().getBoard());
+                    gameplayUI.printAndUpdateBoard(userGameCommand.getGame().getBoard());
                 }
                 case NOTIFICATION -> {
                     Notification userGameCommand = new Gson().fromJson(message, Notification.class);
@@ -110,9 +107,6 @@ public class ClientHandler implements  NotificationHandler{
                         // Switch to GAME
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
-//                        gameplayUI.setCurrentGameId(currentGameID);
-//                        gameplayUI.setCurrentPlayerColor(postloginUI.getCurrentColor());
-//                        gameplayUI.setCurrentUsername(preloginUI.getCurrentUsername());
                         handleJoinWebsocket(preloginUI.getAuthToken(), postloginUI.getCurrentGameId(), postloginUI.getCurrentColor(), preloginUI.getCurrentUsername());
                         }
                 } else if (state.equals(State.GAME)) {
@@ -144,6 +138,9 @@ public class ClientHandler implements  NotificationHandler{
     private void handleJoinWebsocket(String currentAuthToken, Integer currentGameID, ChessGame.TeamColor currentColor, String currentUsername) throws ResponseException {
         WebsocketFacade ws = new WebsocketFacade(serverUrl, this);
         gameplayUI.setWebSocketFacade(ws);
+        gameplayUI.setCurrentPlayerColor(postloginUI.getCurrentColor());
+        gameplayUI.setCurrentGameId(currentGameID);
+        gameplayUI.setCurrentUsername(preloginUI.getCurrentUsername());
         ws.joinPlayer(currentAuthToken, currentGameID,currentColor,currentUsername);
     }
 }

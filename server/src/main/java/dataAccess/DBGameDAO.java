@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
@@ -95,6 +96,10 @@ public class DBGameDAO implements GameDAO {
         }
         var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         var newGame = new ChessGame();
+        ChessBoard chessBoard = new ChessBoard();
+        chessBoard.resetBoard();
+        newGame.setBoard(chessBoard);
+        newGame.setTeamTurn(ChessGame.TeamColor.WHITE);
         var json = new Gson().toJson(newGame);
         var id = executeUpdate(statement, null, null, gameName, json);
         return new GameData(id, null, null, gameName, newGame);

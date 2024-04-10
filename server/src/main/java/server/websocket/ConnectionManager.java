@@ -1,7 +1,5 @@
 package server.websocket;
 
-import model.GameData;
-import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.serverMessages.ServerMessage;
 
@@ -54,6 +52,7 @@ public class ConnectionManager {
         for (var c : innerMap.values()) {
             if (c.session.isOpen()) {
                 if (c.authToken.equals(authToken)) {
+                    var a = notification.toString();
                     c.send(notification.toString());
                 }
             } else {

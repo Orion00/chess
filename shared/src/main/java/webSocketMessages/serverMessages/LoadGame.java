@@ -17,4 +17,9 @@ public class LoadGame extends ServerMessage{
         super(type);
         this.serverMessageType = ServerMessageType.LOAD_GAME;
     }
+
+//    @Override
+//    public String toString() {
+//        return "LoadGame"+game.toString();
+//    }
 }
