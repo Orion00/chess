@@ -21,6 +21,10 @@ public class BoardDrawer {
     public void drawBoard(PrintStream out, String playerColor, ChessBoard board) throws ResponseException {
         try {
             BoardDrawer.playerColor = playerColor;
+            if (BoardDrawer.playerColor == "null") {
+                //Observer
+                BoardDrawer.playerColor = "WHITE";
+            }
             BoardDrawer.board = board;
             out.print(ERASE_SCREEN);
 

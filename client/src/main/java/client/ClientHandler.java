@@ -107,10 +107,9 @@ public class ClientHandler implements  NotificationHandler {
                         // Switch to GAME
                         state = State.GAME;
                         currentGameID = postloginUI.getCurrentGameId();
-                        handleJoinWebsocket(preloginUI.getAuthToken(), postloginUI.getCurrentGameId(), postloginUI.getCurrentColor(), preloginUI.getCurrentUsername());
+                        handleJoinWebsocket(preloginUI.getAuthToken(), postloginUI.getCurrentGameId(), preloginUI.getCurrentUsername());
                         }
                 } else if (state.equals(State.GAME)) {
-//                    result = gameplayUI.print();
                     result =gameplayUI.eval(currentAuthToken,line);
                     // TODO: Add function to leave;
                 }
@@ -135,12 +134,17 @@ public class ClientHandler implements  NotificationHandler {
 //        return currentAuthToken != null;
 //    }
 
-    private void handleJoinWebsocket(String currentAuthToken, Integer currentGameID, ChessGame.TeamColor currentColor, String currentUsername) throws ResponseException {
+    private void handleJoinWebsocket(String currentAuthToken, Integer currentGameID, String currentUsername) throws ResponseException {
         WebsocketFacade ws = new WebsocketFacade(serverUrl, this);
         gameplayUI.setWebSocketFacade(ws);
         gameplayUI.setCurrentPlayerColor(postloginUI.getCurrentColor());
         gameplayUI.setCurrentGameId(currentGameID);
         gameplayUI.setCurrentUsername(preloginUI.getCurrentUsername());
-        ws.joinPlayer(currentAuthToken, currentGameID,currentColor,currentUsername);
+        if (currentColor == null) {
+            ws.joinObserver(currentAuthToken, currentGameID, currentUsername);
+        } else {
+            ws.joinPlayer(currentAuthToken, currentGameID,currentColor,currentUsername);
+        }
+
     }
 }

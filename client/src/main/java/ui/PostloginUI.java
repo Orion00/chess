@@ -181,6 +181,7 @@ public class PostloginUI implements ClientUI {
         return switch (currentColor) {
             case "WHITE" -> ChessGame.TeamColor.WHITE;
             case "BLACK" -> ChessGame.TeamColor.BLACK;
+            case null -> null;
             default -> throw new ResponseException(400, "Invalid color");
         };
     }
