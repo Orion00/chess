@@ -1,7 +1,6 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import client.ServerFacade;
 import client.websocket.WebsocketFacade;
 import exception.ResponseException;
@@ -18,7 +17,7 @@ public class GameplayUI implements ClientUI{
     private ChessGame.TeamColor currentPlayerColor;
     private WebsocketFacade ws;
     private String currentUsername;
-    private ChessBoard currentBoard;
+    private ChessGame currentGame;
 
 
     public GameplayUI(String url, ServerFacade server) {
@@ -34,7 +33,7 @@ public class GameplayUI implements ClientUI{
             (Functionality limited)
             help - Display available commands
             print - Show your board
-            move - Move selected piece
+            move <START LOCATION> <END LOCATION> <PIECE TO PROMOTE TO>- Move selected piece
             show - Show available moves for selected piece
             leave - Return to previous window. Can resume later
             resign - Surrender the game
@@ -49,11 +48,10 @@ public class GameplayUI implements ClientUI{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "print" -> print(authToken, params);
-                case "fail" -> throw new ResponseException(400,"You failed.");
                 case "quit" -> "quit";
                 case "help" -> help();
                 case "print" -> print(currentAuthToken, line);
+                case "move" -> makeMove(currentAuthToken, line);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -61,11 +59,15 @@ public class GameplayUI implements ClientUI{
         }
     }
 
+    public ChessGame.TeamColor getCurrentPlayerColor() {
+        return currentPlayerColor;
+    }
+
     public String print(String authToken, String... params) throws ResponseException {
         if (params.length > 1) {
             throw new ResponseException(400, "Too many inputs entered");
         }
-        printBoard(currentBoard);
+        printBoard(currentGame.getBoard());
 
         return "";
     }
@@ -83,16 +85,88 @@ public class GameplayUI implements ClientUI{
 
     public void setCurrentUsername(String currentUsername) { this.currentUsername = currentUsername;}
 
-    public void printAndUpdateBoard(ChessBoard board) throws ResponseException {
+    public void printAndUpdateBoard(ChessGame game) throws ResponseException {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         System.out.print("A move was made. Printing updated board.");
-        printBoard(board);
-        currentBoard = board;
+        printBoard(game.getBoard());
+        currentGame = game;
     }
-    public void printBoard(ChessBoard board) throws ResponseException {
+    private void printBoard(ChessBoard board) throws ResponseException {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         System.out.println();
         BoardDrawer boardDrawer = new BoardDrawer();
         boardDrawer.drawBoard(out, String.valueOf(currentPlayerColor), board);
+    }
+
+    private String makeMove(String authToken, String... params) throws ResponseException {
+        if (params.length > 4) {
+            throw new ResponseException(400, "Too many inputs entered. Try again.");
+        } else if (params.length < 3) {
+            throw new ResponseException(400, "Please enter a starting location and ending location. Try again");
+        }
+        String startLocation = params[1];
+        String endLocation = params[2];
+
+        Integer startRow = Character.getNumericValue(startLocation.charAt(1));
+        Integer startCol = startLocation.charAt(0) - 'a' + 1; // uses ASCII to calculate column
+        Integer endRow = Character.getNumericValue(endLocation.charAt(1));
+        Integer endCol = endLocation.charAt(0) - 'a' + 1;
+
+        if (startCol < 1 || startCol > 8 || startRow < 1 || startRow > 8 ||
+                endCol < 1 || endCol > 8 || endRow < 1 || endRow > 8) {
+            throw new ResponseException(400, "Invalid move. Please select a position on the board.");
+        }
+
+        ChessPiece.PieceType promotionPiece = null;
+        if ((currentGame.getBoard().getPiece(new ChessPosition(startRow, startCol)).getPieceType() == ChessPiece.PieceType.PAWN) &&
+                (endRow == 1 || endRow == 8)) {
+            if (params.length != 3) {
+                throw new ResponseException(400, "Please enter a piece to promote to.");
+            } else {
+               promotionPiece = convertToPiece(params[3]).getPieceType();
+            }
+
+        }
+
+
+
+
+        //TODO: Implement validation and send move
+        ChessMove propMove = new ChessMove(new ChessPosition(startRow, startCol), new ChessPosition(endRow, endCol), promotionPiece);
+        try {
+            currentGame.makeMove(propMove);
+            // TODO: Send move
+        } catch (InvalidMoveException e) {
+            throw new ResponseException(400, "Illegal move. Try again.");
+        }
+
+
+        return String.format("Move successful from %s to %s", startLocation, endLocation);
+    }
+
+    private ChessPiece convertToPiece(String param) throws ResponseException {
+        String piece = param.toUpperCase();
+        return switch (piece) {
+            case "QUEEN" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+            case "BISHOP" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+            case "ROOK" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+            case "CASTLE" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+            case "KNIGHT" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+            case "HORSE" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+            default -> throw new ResponseException(400, "Invalid piece to promote to. Check spelling and try again.");
+        };
+    }
+
+
+    private boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            Integer i = Integer.parseInt(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 }

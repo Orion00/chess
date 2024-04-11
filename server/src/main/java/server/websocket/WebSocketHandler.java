@@ -73,7 +73,7 @@ public class WebSocketHandler {
         try {
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
-            var message = String.format("%s has joined the game as %s", userGameCommand.getAuthString(), userGameCommand.getPlayerColor());
+            var message = String.format("%s has joined the game as %s", userGameCommand.getUsername(), userGameCommand.getPlayerColor());
             var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
             notification.setMessage(message);
             // TODO: See if this works
@@ -93,7 +93,7 @@ public class WebSocketHandler {
         try {
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
-            var message = String.format("%s has started watching the game.", userGameCommand.getAuthString());
+            var message = String.format("%s has started watching the game.", userGameCommand.getUsername());
             var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
             notification.setMessage(message);
             // TODO: See if this works

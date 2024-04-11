@@ -37,7 +37,7 @@ public class ClientHandler implements  NotificationHandler {
             switch (serverMessage.getServerMessageType()) {
                 case LOAD_GAME -> {
                     LoadGame userGameCommand = new Gson().fromJson(message, LoadGame.class);
-                    gameplayUI.printAndUpdateBoard(userGameCommand.getGame().getBoard());
+                    gameplayUI.printAndUpdateBoard(userGameCommand.getGame());
                 }
                 case NOTIFICATION -> {
                     System.out.println(SET_TEXT_COLOR_RED);
@@ -141,7 +141,7 @@ public class ClientHandler implements  NotificationHandler {
         gameplayUI.setCurrentPlayerColor(postloginUI.getCurrentColor());
         gameplayUI.setCurrentGameId(currentGameID);
         gameplayUI.setCurrentUsername(preloginUI.getCurrentUsername());
-        if (currentColor == null) {
+        if (gameplayUI.getCurrentPlayerColor() == null) {
             ws.joinObserver(currentAuthToken, currentGameID, currentUsername);
         } else {
             ws.joinPlayer(currentAuthToken, currentGameID,currentColor,currentUsername);

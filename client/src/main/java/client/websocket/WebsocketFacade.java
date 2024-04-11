@@ -79,6 +79,17 @@ public class WebsocketFacade extends Endpoint {
         } catch (IOException i) {
             throw new ResponseException(500, i.getMessage());
         }
+    }
 
+    public void makeMove(String auth,Integer gameId, String username) throws ResponseException {
+        try {
+            JoinObserver command = new JoinObserver(auth);
+
+            command.setGameID(gameId);
+            command.setUsername(username);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException i) {
+            throw new ResponseException(500, i.getMessage());
+        }
     }
 }
