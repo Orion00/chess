@@ -152,7 +152,7 @@ public class GameplayUI implements ClientUI{
             testGame.setTeamTurn(currentGame.getTeamTurn());
             testGame.makeMove(propMove);
 
-            ws.makeMove(currentAuthToken, currentGameId, currentUsername, propMove);
+            ws.makeMove(currentAuthToken, currentGameId, currentUsername, getCurrentColor(),propMove);
         } catch (InvalidMoveException e) {
             throw new ResponseException(400, "Move failed. "+e.getMessage());
         }
@@ -171,6 +171,14 @@ public class GameplayUI implements ClientUI{
             case "KNIGHT" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
             case "HORSE" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
             default -> throw new ResponseException(400, "Invalid piece to promote to. Check spelling and try again.");
+        };
+    }
+
+    public String getCurrentColor() throws ResponseException{
+        return switch (currentPlayerColor) {
+            case WHITE -> "WHITE";
+            case BLACK -> "BLACK";
+            case null -> null;
         };
     }
 }

@@ -123,6 +123,15 @@ public class WebSocketHandler {
 
             // Check if valid and correct team color is done in makeMove()
             // Changing turns is done in makeMove()
+            if (userGameCommand.getPlayerColor() == null) {
+                throw new ResponseException(400, "You can't make moves as an observer");
+            }
+            // Checks the game turn, the piece moving, and the person sending all have the same color
+            if ((propGame.getGame().getTeamTurn() != userGameCommand.getPlayerColor()) ||
+                    propGame.getGame().getBoard().getPiece(propMove.getStartPosition()).getTeamColor() != userGameCommand.getPlayerColor()) {
+                throw new ResponseException(400, "You can't make a move for "+propGame.getGame().getBoard().getPiece(propMove.getStartPosition()).getTeamColor());
+
+            }
             propGame.getGame().makeMove(propMove);
 
             // Make move in DB
@@ -138,7 +147,6 @@ public class WebSocketHandler {
             LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
             loadGame.setGame(game.getGame());
             connections.broadcast(game.gameID(), null, loadGame);
-            // Alternately, broadcast and send
         } catch (DataAccessException | IOException i) {
             throw new ResponseException(500, i.getMessage());
         } catch (InvalidMoveException e) {

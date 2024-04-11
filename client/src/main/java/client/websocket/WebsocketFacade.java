@@ -82,13 +82,13 @@ public class WebsocketFacade extends Endpoint {
         }
     }
 
-    public void makeMove(String auth, Integer gameId, String username, ChessMove move) throws ResponseException {
+    public void makeMove(String auth, Integer gameId, String username, String playerColor, ChessMove move) throws ResponseException {
         try {
             MakeMove command = new MakeMove(auth);
             command.setMove(move);
             command.setGameID(gameId);
             command.setUsername(username);
-
+            command.setPlayerColor(playerColor);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException i) {
             throw new ResponseException(500, i.getMessage());
