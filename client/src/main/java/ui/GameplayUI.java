@@ -19,6 +19,15 @@ public class GameplayUI implements ClientUI{
     private String currentUsername;
     private ChessGame currentGame;
 
+    private String currentAuthToken;
+
+    public String getCurrentAuthToken() {
+        return currentAuthToken;
+    }
+
+    public void setCurrentAuthToken(String currentAuthToken) {
+        this.currentAuthToken = currentAuthToken;
+    }
 
     public GameplayUI(String url, ServerFacade server) {
         serverUrl = url;
@@ -50,8 +59,8 @@ public class GameplayUI implements ClientUI{
             return switch (cmd) {
                 case "quit" -> "quit";
                 case "help" -> help();
-                case "print" -> print(currentAuthToken, line);
-                case "move" -> makeMove(currentAuthToken, line);
+                case "print" -> print(currentAuthToken, params);
+                case "move" -> makeMove(currentAuthToken, params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -99,13 +108,13 @@ public class GameplayUI implements ClientUI{
     }
 
     private String makeMove(String authToken, String... params) throws ResponseException {
-        if (params.length > 4) {
+        if (params.length > 3) {
             throw new ResponseException(400, "Too many inputs entered. Try again.");
-        } else if (params.length < 3) {
+        } else if (params.length < 2) {
             throw new ResponseException(400, "Please enter a starting location and ending location. Try again");
         }
-        String startLocation = params[1];
-        String endLocation = params[2];
+        String startLocation = params[0];
+        String endLocation = params[1];
 
         Integer startRow = Character.getNumericValue(startLocation.charAt(1));
         Integer startCol = startLocation.charAt(0) - 'a' + 1; // uses ASCII to calculate column
@@ -134,10 +143,13 @@ public class GameplayUI implements ClientUI{
         //TODO: Implement validation and send move
         ChessMove propMove = new ChessMove(new ChessPosition(startRow, startCol), new ChessPosition(endRow, endCol), promotionPiece);
         try {
+            // currentGame.makeMove() just tests if it works. currentGame will be changed by this function,
+            // but it will be updated if it succeeded or failed by LOAD_GAME
             currentGame.makeMove(propMove);
-            // TODO: Send move
+
+            ws.makeMove(currentAuthToken, currentGameId, currentUsername, propMove);
         } catch (InvalidMoveException e) {
-            throw new ResponseException(400, "Illegal move. Try again.");
+            throw new ResponseException(400, "Move failed. "+e.getMessage());
         }
 
 
@@ -155,18 +167,5 @@ public class GameplayUI implements ClientUI{
             case "HORSE" -> new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
             default -> throw new ResponseException(400, "Invalid piece to promote to. Check spelling and try again.");
         };
-    }
-
-
-    private boolean isNumeric(String strNum) {
-        if (strNum == null) {
-            return false;
-        }
-        try {
-            Integer i = Integer.parseInt(strNum);
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
-        return true;
     }
 }

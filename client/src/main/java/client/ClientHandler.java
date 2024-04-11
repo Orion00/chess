@@ -91,6 +91,7 @@ public class ClientHandler implements  NotificationHandler {
                 if (state.equals(State.LOGGEDOUT)) {
                     result = preloginUI.eval(line);
                     if (preloginUI.isAuthorized()) {
+                        // TODO: Add isAuthorized to registering too
                         // SWITCH TO LOGGEDIN
                         state = State.LOGGEDIN;
                         currentAuthToken = preloginUI.getAuthToken();
@@ -141,6 +142,7 @@ public class ClientHandler implements  NotificationHandler {
         gameplayUI.setCurrentPlayerColor(postloginUI.getCurrentColor());
         gameplayUI.setCurrentGameId(currentGameID);
         gameplayUI.setCurrentUsername(preloginUI.getCurrentUsername());
+        gameplayUI.setCurrentAuthToken(currentAuthToken);
         if (gameplayUI.getCurrentPlayerColor() == null) {
             ws.joinObserver(currentAuthToken, currentGameID, currentUsername);
         } else {

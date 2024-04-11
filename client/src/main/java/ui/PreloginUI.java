@@ -74,6 +74,7 @@ public class PreloginUI implements  ClientUI{
             throw new ResponseException(403, "invalid login credentials");
         }*/
         this.currentAuthToken = auth.authToken();
+        this.currentUsername = params[0];
         return "Registration successful. Welcome "+params[0]+".\nType \"help\" to view new commands";
     }
 

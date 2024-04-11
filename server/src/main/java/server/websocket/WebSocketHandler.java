@@ -16,6 +16,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
+import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -41,7 +42,7 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws ResponseException {
+    public void onMessage(Session session, String message) {
         UserGameCommand userGameCommandGen = new Gson().fromJson(message, UserGameCommand.class);
 
         try {
@@ -64,8 +65,13 @@ public class WebSocketHandler {
                 }
 //                case RESIGN -> resign();
             }
-        } catch (IOException i) {
-            throw new ResponseException(500, i.getMessage());
+        } catch (IOException | ResponseException i) {
+//            throw new ResponseException(500, i.getMessage());
+            //TODO: Create error object
+            Error error = new Error(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage(i.getMessage());
+            connections.send(userGameCommandGen.g, userGameCommand.getAuthString(), loadGame);
+
         }
     }
 
@@ -127,7 +133,7 @@ public class WebSocketHandler {
 
             // send and broadcast (or broadcast with null authtoken)
             GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
-            if (propGame != game) {
+            if (!propGame.equals(game)) {
                 throw new ResponseException(500, "Update for game failed in DB");
             }
 
