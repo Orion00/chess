@@ -1,7 +1,12 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
+import dataAccess.DBGameDAO;
 import dataAccess.DataAccessException;
+import dataAccess.GameDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -14,12 +19,11 @@ import service.UserService;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @WebSocket
@@ -54,33 +58,16 @@ public class WebSocketHandler {
                     Leave userGameCommand = new Gson().fromJson(message, Leave.class);
                     leave(userGameCommand);
                 }
-//                case JOIN_OBSERVER -> joinObs(action.visitorName());
-//                case MAKE_MOVE -> makeMove();
+                case MAKE_MOVE -> {
+                    MakeMove userGameCommand = new Gson().fromJson(message, MakeMove.class);
+                    makeMove(userGameCommand);
+                }
 //                case RESIGN -> resign();
             }
         } catch (IOException i) {
             throw new ResponseException(500, i.getMessage());
         }
     }
-//
-
-//    private UserGameCommand convertUserGameCommand(UserGameCommand userGameCommandGen) {
-//        switch (userGameCommandGen.getCommandType()) {
-//            case JOIN_PLAYER -> {
-//                JoinPlayer userGameCommand = (JoinPlayer) userGameCommandGen;
-//                userGameCommand.setGameID(userGameCommand.getGameID());
-//                return userGameCommand;
-//            }
-//            case LEAVE -> userGameCommandGen;
-//            default -> return userGameCommandGen;
-////                case JOIN_OBSERVER -> joinObs(action.visitorName());
-//////                case MAKE_MOVE -> makeMove();
-////            case LEAVE -> leave(userGameCommand);
-////            case GET_GAME -> getGame(userGameCommand, session);
-//////                case RESIGN -> resign();
-////        }
-//        }
-//    }
 
     private void joinPlayer(JoinPlayer userGameCommand, Session session) throws ResponseException {
         try {
@@ -92,16 +79,11 @@ public class WebSocketHandler {
             // TODO: See if this works
             connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
 
-            List<GameData> games = gameService.listGames(new AuthData(userGameCommand.getAuthString(), null));
-            for (GameData game : games) {
-                if (game.gameID() == userGameCommand.getGameID()) {
-                    LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
-                    loadGame.setGame(game.getGame());
-                    connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
-                    return;
-                }
-            }
-            throw new ResponseException(500, "Can't find game to join");
+            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+            loadGame.setGame(game.getGame());
+            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
+
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
         }
@@ -117,19 +99,48 @@ public class WebSocketHandler {
             // TODO: See if this works
             connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
 
-            List<GameData> games = gameService.listGames(new AuthData(userGameCommand.getAuthString(), null));
-            for (GameData game : games) {
-                if (game.gameID() == userGameCommand.getGameID()) {
-                    LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
-                    loadGame.setGame(game.getGame());
-                    connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
-                    return;
-                }
-            }
+            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+            loadGame.setGame(game.getGame());
+            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
+            // TODO: Throw new type of exception that gets turned into ServerMessage.Error
             throw new ResponseException(500, "Can't find game to join");
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
         }
+    }
+
+    private void makeMove(MakeMove userGameCommand) throws ResponseException {
+
+        try {
+            // Validate move
+            ChessMove propMove = userGameCommand.getMove();
+            GameData propGame = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+
+            // Check if valid and correct team color is done in makeMove()
+            // Changing turns is done in makeMove()
+            propGame.getGame().makeMove(propMove);
+
+            // Make move in DB
+            GameDAO gameDAO = new DBGameDAO();
+            gameDAO.updateGames(propGame);
+
+            // send and broadcast (or broadcast with null authtoken)
+            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+            if (propGame != game) {
+                throw new ResponseException(500, "Update for game failed in DB");
+            }
+
+            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+            loadGame.setGame(game.getGame());
+            connections.broadcast(game.gameID(), null, loadGame);
+            // Alternately, broadcast and send
+        } catch (DataAccessException | IOException i) {
+            throw new ResponseException(500, i.getMessage());
+        } catch (InvalidMoveException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+
     }
 
     private void leave(UserGameCommand userGameCommandGen) throws IOException {
@@ -143,4 +154,13 @@ public class WebSocketHandler {
         connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
     }
 
+    private GameData getGame(String authString, Integer gameID) throws ResponseException, DataAccessException {
+        List<GameData> games = gameService.listGames(new AuthData(authString, null));
+        for (GameData game : games) {
+            if (game.gameID() == gameID) {
+                return game;
+            }
+        }
+        throw new ResponseException(500, "GameID wasn't found");
+    }
 }
