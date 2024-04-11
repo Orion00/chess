@@ -42,7 +42,7 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) {
+    public void onMessage(Session session, String message) throws IOException {
         UserGameCommand userGameCommandGen = new Gson().fromJson(message, UserGameCommand.class);
 
         try {
@@ -70,8 +70,7 @@ public class WebSocketHandler {
             //TODO: Create error object
             Error error = new Error(ServerMessage.ServerMessageType.ERROR);
             error.setErrorMessage(i.getMessage());
-            connections.send(userGameCommandGen.g, userGameCommand.getAuthString(), loadGame);
-
+            session.getRemote().sendString(error.toString());
         }
     }
 
@@ -110,7 +109,6 @@ public class WebSocketHandler {
             loadGame.setGame(game.getGame());
             connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
             // TODO: Throw new type of exception that gets turned into ServerMessage.Error
-            throw new ResponseException(500, "Can't find game to join");
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
         }

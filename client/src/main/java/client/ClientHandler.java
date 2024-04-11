@@ -146,7 +146,7 @@ public class ClientHandler implements  NotificationHandler {
         if (gameplayUI.getCurrentPlayerColor() == null) {
             ws.joinObserver(currentAuthToken, currentGameID, currentUsername);
         } else {
-            ws.joinPlayer(currentAuthToken, currentGameID,currentColor,currentUsername);
+            ws.joinPlayer(currentAuthToken, currentGameID,gameplayUI.getCurrentPlayerColor(),currentUsername);
         }
 
     }

@@ -116,6 +116,7 @@ public class GameplayUI implements ClientUI{
         String startLocation = params[0];
         String endLocation = params[1];
 
+        // TODO: Check with regex to make sure it works
         Integer startRow = Character.getNumericValue(startLocation.charAt(1));
         Integer startCol = startLocation.charAt(0) - 'a' + 1; // uses ASCII to calculate column
         Integer endRow = Character.getNumericValue(endLocation.charAt(1));
@@ -145,7 +146,11 @@ public class GameplayUI implements ClientUI{
         try {
             // currentGame.makeMove() just tests if it works. currentGame will be changed by this function,
             // but it will be updated if it succeeded or failed by LOAD_GAME
-            currentGame.makeMove(propMove);
+            ChessBoard testBoard = currentGame.getBoard().clone();
+            ChessGame testGame = new ChessGame();
+            testGame.setBoard(testBoard);
+            testGame.setTeamTurn(currentGame.getTeamTurn());
+            testGame.makeMove(propMove);
 
             ws.makeMove(currentAuthToken, currentGameId, currentUsername, propMove);
         } catch (InvalidMoveException e) {

@@ -14,13 +14,6 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
 
     public String prettyToString() {
         StringBuilder result = new StringBuilder();
-//        String a = "GameData{" +
-//                "gameID=" + gameID +
-//                ", whiteUsername='" + whiteUsername + '\'' +
-//                ", blackUsername='" + blackUsername + '\'' +
-//                ", gameName='" + gameName + '\'' +
-//                ", game=" + game +
-//                '}';
         result.append("  Game Name: ");
         result.append(gameName);
         result.append("\n  Players: ");

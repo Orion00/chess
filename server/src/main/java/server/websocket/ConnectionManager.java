@@ -52,7 +52,6 @@ public class ConnectionManager {
         for (var c : innerMap.values()) {
             if (c.session.isOpen()) {
                 if (c.authToken.equals(authToken)) {
-                    var a = notification.toString();
                     c.send(notification.toString());
                 }
             } else {
