@@ -65,7 +65,7 @@ public class GameplayUI implements ClientUI{
         if (params.length > 1) {
             throw new ResponseException(400, "Too many inputs entered");
         }
-        printAndUpdateBoard(currentBoard);
+        printBoard(currentBoard);
 
         return "";
     }
@@ -85,8 +85,14 @@ public class GameplayUI implements ClientUI{
 
     public void printAndUpdateBoard(ChessBoard board) throws ResponseException {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        System.out.print("A move was made. Printing updated board.");
+        printBoard(board);
+        currentBoard = board;
+    }
+    public void printBoard(ChessBoard board) throws ResponseException {
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        System.out.println();
         BoardDrawer boardDrawer = new BoardDrawer();
         boardDrawer.drawBoard(out, String.valueOf(currentPlayerColor), board);
-        currentBoard = board;
     }
 }

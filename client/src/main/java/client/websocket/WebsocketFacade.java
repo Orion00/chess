@@ -4,9 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -74,6 +72,7 @@ public class WebsocketFacade extends Endpoint {
     public void joinObserver(String auth,Integer gameId, String username) throws ResponseException {
         try {
             JoinObserver command = new JoinObserver(auth);
+
             command.setGameID(gameId);
             command.setUsername(username);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));

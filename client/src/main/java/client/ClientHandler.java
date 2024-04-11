@@ -32,7 +32,6 @@ public class ClientHandler implements  NotificationHandler {
 
     @Override
     public void notify(String message) {
-        System.out.println(SET_TEXT_COLOR_RED);
         ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
         try {
             switch (serverMessage.getServerMessageType()) {
@@ -41,9 +40,11 @@ public class ClientHandler implements  NotificationHandler {
                     gameplayUI.printAndUpdateBoard(userGameCommand.getGame().getBoard());
                 }
                 case NOTIFICATION -> {
+                    System.out.println(SET_TEXT_COLOR_RED);
                     Notification userGameCommand = new Gson().fromJson(message, Notification.class);
                     System.out.print(userGameCommand.getMessage());
                 } case ERROR -> {
+                    System.out.println(SET_TEXT_COLOR_RED);
                     Error userGameCommand = new Gson().fromJson(message, Error.class);
                     System.out.print(userGameCommand.getErrorMessage());
                 }
@@ -69,10 +70,10 @@ public class ClientHandler implements  NotificationHandler {
         postloginUI = new PostloginUI(url, server);
         gameplayUI = new GameplayUI(url, server);
         this.state = State.LOGGEDOUT;
-        currentAuthToken = null;
-        currentGameID = null;
-        currentColor = null;
-        currentUsername = null;
+//        currentAuthToken = null;
+//        currentGameID = null;
+//        currentColor = null;
+//        currentUsername = null;
     }
 
     public void run() {
