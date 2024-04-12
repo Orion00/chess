@@ -137,23 +137,6 @@ public class WebSocketHandler {
             ChessGame updatedGame = propGame.getGame();
 
 //            // Check for end of game conditions
-//            if (propGame.getGame().isInCheckmate(userGameCommand.getPlayerColor())) {
-//                if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
-//                    updatedGame.setWinner(ChessGame.Winner.BLACK);
-//                } else if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.BLACK) {
-//                    updatedGame.setWinner(ChessGame.Winner.WHITE);
-//                }
-//                gameDAO.updateGames(new GameData(propGame.gameID(), propGame.whiteUsername(), propGame.whiteUsername(), propGame.gameName(), updatedGame));
-//                String endGameMessage = String.format("%s team wins!", updatedGame.getWinner().toString());
-//                transmitGameEnd(endGameMessage, userGameCommand.getGameID());
-//                return;
-//            } else if (propGame.getGame().isInStalemate(userGameCommand.getPlayerColor())) {
-//                updatedGame.setWinner(ChessGame.Winner.NO);
-//                gameDAO.updateGames(new GameData(propGame.gameID(), propGame.whiteUsername(), propGame.whiteUsername(), propGame.gameName(), updatedGame));
-//                String endGameMessage = "Stalemate. It's a draw";
-//                transmitGameEnd(endGameMessage, userGameCommand.getGameID());
-//                return;
-//            }
 
             // Check if valid and correct team color is done in makeMove()
             // Changing turns is done in makeMove()
@@ -196,17 +179,7 @@ public class WebSocketHandler {
             connections.broadcast(game.gameID(), userGameCommand.getAuthString(), notification);
 
             // Check for check
-//            ChessGame.TeamColor opposingTeam;
-//            if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
-//                opposingTeam = ChessGame.TeamColor.BLACK;
-//            } else {
-//                opposingTeam = ChessGame.TeamColor.WHITE;
-//            }
-//            if (propGame.getGame().isInCheck(opposingTeam)) {
-//                Notification notification1 = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
-//                notification1.setMessage(String.format("%s is in check.",opposingTeam.toString()));
-//                connections.broadcast(game.gameID(), null, notification1);
-//            }
+
 
             LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
             loadGame.setGame(game.getGame());
