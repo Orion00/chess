@@ -55,7 +55,6 @@ public class ServerFacade {
     }
 
     public void joinGame(String authToken,String playerColor, Integer gameID) throws ResponseException {
-        // TODO: Add some functionality to this
         var path = "/game";
         this.makeRequest("PUT", path, new JoiningGameData(playerColor, gameID), authToken, null);
     }

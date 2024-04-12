@@ -145,7 +145,6 @@ public class GameplayUI implements ClientUI{
             throw new ResponseException(400, "Please enter a starting location and ending location. Try again");
         }
 
-        // TODO: Check with regex to make sure it works
         String regex = "(?i)[a-h][1-8]";
         Pattern pattern = Pattern.compile(regex);
         int increment = 0;
@@ -229,8 +228,7 @@ public class GameplayUI implements ClientUI{
     }
 
     public boolean isPlaying() {
-        //TODO: FIx this
-        return true;
+        return (currentGame != null && currentGameId != null);
     }
     private int convertColCharToInt(Character c) throws ResponseException {
         char cha = Character.toLowerCase(c);

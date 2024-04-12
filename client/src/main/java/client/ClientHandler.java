@@ -84,7 +84,6 @@ public class ClientHandler implements  NotificationHandler {
                 if (state.equals(State.LOGGEDOUT)) {
                     result = preloginUI.eval(line);
                     if (preloginUI.isAuthorized()) {
-                        // TODO: Add isAuthorized to registering too
                         // SWITCH TO LOGGEDIN
                         state = State.LOGGEDIN;
                         currentAuthToken = preloginUI.getAuthToken();
@@ -105,8 +104,9 @@ public class ClientHandler implements  NotificationHandler {
                         }
                 } else if (state.equals(State.GAME)) {
                     result =gameplayUI.eval(currentAuthToken,line);
-                    if (gameplayUI.isPlaying() == false) {
-
+                    if (!gameplayUI.isPlaying()) {
+                        state = State.LOGGEDIN;
+                        postloginUI.resetCurrentGameId();
                     }
 
                 }
