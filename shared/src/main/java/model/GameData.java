@@ -16,6 +16,11 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
         StringBuilder result = new StringBuilder();
         result.append("  Game Name: ");
         result.append(gameName);
+
+        if (game.getWinner() != null) {
+            result.append("\n  Winner: ");
+            result.append(game.getWinner().toString());
+        }
         result.append("\n  Players: ");
         if (whiteUsername != null) {
             result.append(whiteUsername);

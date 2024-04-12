@@ -8,6 +8,8 @@ import exception.ResponseException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
@@ -65,11 +67,28 @@ public class GameplayUI implements ClientUI{
                 case "move" -> makeMove(currentAuthToken, params);
                 case "show" -> showMoves(params);
                 case "leave" -> leaveGame(params);
+                case "resign" -> resignGame(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    private String resignGame(String... params) throws ResponseException {
+        if (params.length > 0) {
+            throw new ResponseException(400, "Too many inputs entered");
+        }
+
+        System.out.print("Are you sure you want to resign? y/n\n>>> ");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine().toUpperCase();
+
+        if (line.equals("YES") || line.equals("Y")) {
+            ws.resignGame(currentAuthToken, currentGameId, currentPlayerColor, currentUsername);
+            return "You've resigned the game. Type 'leave' when you're ready to leave.";
+        }
+        return "Resignation cancelled. You're still in the game.";
     }
 
     private String leaveGame(String... params) throws ResponseException {
@@ -205,7 +224,8 @@ public class GameplayUI implements ClientUI{
         }
 
 
-        return String.format(SET_TEXT_COLOR_BLUE+"Move successful from %s to %s."+RESET_TEXT_COLOR, startLocation, endLocation);
+        //return String.format(SET_TEXT_COLOR_BLUE+"Move successful from %s to %s."+RESET_TEXT_COLOR, startLocation, endLocation);
+        return "";
     }
 
     private ChessPiece convertToPiece(String param) throws ResponseException {

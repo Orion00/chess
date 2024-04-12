@@ -14,20 +14,19 @@ public class ChessGame {
 
     TeamColor turn;
     ChessBoard board;
+    Winner winner;
 
-    GameState gameState;
 
-
-    public GameState getGameState() {
-        return gameState;
+    public Winner getWinner() {
+        return winner;
     }
 
-    public void setGameState(GameState gameState) {
-        this.gameState = gameState;
+    public void setWinner(Winner winner) {
+        this.winner = winner;
     }
 
     public ChessGame() {
-        turn = TeamColor.WHITE; gameState = GameState.PLAYING;
+        turn = TeamColor.WHITE; winner = null;
     }
 
     /**
@@ -54,8 +53,8 @@ public class ChessGame {
         BLACK
     }
 
-    public enum GameState {
-        PLAYING, CHECKMATE, STALEMALE, RESIGN
+    public enum Winner {
+        WHITE, BLACK
     }
 
     /**

@@ -52,17 +52,47 @@ public class WebSocketHandler {
                     Leave userGameCommand = new Gson().fromJson(message, Leave.class);
                     leave(userGameCommand);
                 }
+                case RESIGN -> {
+                    Resign userGameCommand = new Gson().fromJson(message, Resign.class);
+                    checkIfGameOver(userGameCommand.getAuthString(), userGameCommand.getGameID());
+                    resign(userGameCommand);
+                }
                 case MAKE_MOVE -> {
                     MakeMove userGameCommand = new Gson().fromJson(message, MakeMove.class);
+                    checkIfGameOver(userGameCommand.getAuthString(), userGameCommand.getGameID());
                     makeMove(userGameCommand);
                 }
-//                case RESIGN -> resign();
             }
         } catch (IOException | ResponseException | DataAccessException i) {
             Error error = new Error(ServerMessage.ServerMessageType.ERROR);
             error.setErrorMessage(i.getMessage());
             session.getRemote().sendString(error.toString());
         }
+    }
+
+    private void resign(Resign userGameCommand) throws DataAccessException, ResponseException, IOException {
+        if (userGameCommand.getPlayerColor() == null) {
+            throw new ResponseException(400, "Observers can't resign.");
+        }
+        connections.remove(userGameCommand.getGameID(), userGameCommand.getAuthString());
+        GameDAO gameDAO = new DBGameDAO();
+        GameData game = gameDAO.getGame(userGameCommand.getGameID());
+        ChessGame updatedGame = game.getGame();
+        String message;
+        if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
+            message = String.format("%s has resigned.", userGameCommand.getUsername());
+            updatedGame.setWinner(ChessGame.Winner.BLACK);
+        } else {
+            message = String.format("%s has resigned.", userGameCommand.getUsername());
+            updatedGame.setWinner(ChessGame.Winner.WHITE);
+        }
+        gameDAO.updateGames(new GameData(game.gameID(), game.whiteUsername(), game.whiteUsername(), game.gameName(), updatedGame));
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setMessage(message);
+        connections.broadcast(userGameCommand.getGameID(),null, notification);
+
+        String endGameMessage = String.format("%s team wins!", updatedGame.getWinner().toString());
+        transmitGameEnd(endGameMessage, userGameCommand.getGameID());
     }
 
     private void joinPlayer(JoinPlayer userGameCommand, Session session) throws ResponseException {
@@ -186,4 +216,22 @@ public class WebSocketHandler {
         loadGame.setGame(game.getGame());
         connections.send(game.gameID(), auth, loadGame);
     }
+
+    private void transmitGameEnd(String broadcastMessage, Integer gameId) throws IOException {
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setMessage(broadcastMessage);
+        connections.broadcast(gameId,null, notification);
+    }
+
+    private void checkIfGameOver(String auth,Integer gameId) throws ResponseException, DataAccessException {
+        GameData game = getGame(auth, gameId);
+        ChessGame chessGame = game.getGame();
+        if (chessGame != null) {
+            if (chessGame.getWinner() != null) {
+                String endGameMessage = String.format("Game has ended. %s team won.", chessGame.getWinner().toString());
+                throw new ResponseException(500, endGameMessage);
+            }
+        }
+    }
+    // If we get through here, the game is still going
 }
