@@ -15,9 +15,19 @@ public class ChessGame {
     TeamColor turn;
     ChessBoard board;
 
+    GameState gameState;
+
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
 
     public ChessGame() {
-        turn = TeamColor.WHITE;
+        turn = TeamColor.WHITE; gameState = GameState.PLAYING;
     }
 
     /**
@@ -42,6 +52,10 @@ public class ChessGame {
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+
+    public enum GameState {
+        PLAYING, CHECKMATE, STALEMALE, RESIGN
     }
 
     /**
@@ -118,12 +132,6 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         // Check if legal
-
-        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
-        if (!validMoves.contains(move)) {
-            throw new InvalidMoveException("Your piece can't make that move");
-        }
-
         ChessPiece piece = board.getPiece(move.getStartPosition());
 
         if(piece == null) {
@@ -132,6 +140,11 @@ public class ChessGame {
 
         if (piece.getTeamColor() != this.getTeamTurn()) {
             throw new InvalidMoveException("It's not your turn");
+        }
+
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if (!validMoves.contains(move)) {
+            throw new InvalidMoveException("Your piece can't make that move");
         }
 
         try {

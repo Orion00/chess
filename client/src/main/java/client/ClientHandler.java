@@ -104,7 +104,10 @@ public class ClientHandler implements  NotificationHandler {
                         }
                 } else if (state.equals(State.GAME)) {
                     result =gameplayUI.eval(currentAuthToken,line);
-                    // TODO: Add function to leave;
+                    if (gameplayUI.isPlaying() == false) {
+
+                    }
+
                 }
                 if (!Objects.equals(result, "quit")) {
                     System.out.print(result);

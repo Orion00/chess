@@ -112,25 +112,37 @@ public class GameplayUI implements ClientUI{
         } else if (params.length < 2) {
             throw new ResponseException(400, "Please enter a starting location and ending location. Try again");
         }
-        String startLocation = params[0];
-        String endLocation = params[1];
 
         // TODO: Check with regex to make sure it works
-        String regex = "[a-h][1-8]";
+        String regex = "(?i)[a-h][1-8]";
         Pattern pattern = Pattern.compile(regex);
+        int increment = 0;
         for (String param : params) {
+            if (increment > 1) {
+                // Don't regex the promotion piece
+                break;
+            }
             if (!pattern.matcher(param).matches()) {
                 throw new ResponseException(400, "Invalid starting or ending location: "+param+". Try again.");
             }
+            increment++;
         }
-        Integer startRow = Character.getNumericValue(startLocation.charAt(1));
-        Integer startCol = startLocation.charAt(0) - 'a' + 1; // uses ASCII to calculate column
-        Integer endRow = Character.getNumericValue(endLocation.charAt(1));
-        Integer endCol = endLocation.charAt(0) - 'a' + 1;
+        String startLocation = params[0];
+        String endLocation = params[1];
+
+        int startRow = Character.getNumericValue(startLocation.charAt(1));
+        int startCol = convertColCharToInt(startLocation.charAt(0));
+        int endRow = Character.getNumericValue(endLocation.charAt(1));
+        int endCol = convertColCharToInt(endLocation.charAt(0));
 
         if (startCol < 1 || startCol > 8 || startRow < 1 || startRow > 8 ||
                 endCol < 1 || endCol > 8 || endRow < 1 || endRow > 8) {
             throw new ResponseException(400, "Invalid move. Please select a position on the board.");
+        }
+
+        ChessPiece propPiece = currentGame.getBoard().getPiece(new ChessPosition(startRow, startCol));
+        if (propPiece == null) {
+            throw new ResponseException(400, "There's no piece at "+startLocation+". Try again.");
         }
 
         ChessPiece.PieceType promotionPiece = null;
@@ -139,7 +151,7 @@ public class GameplayUI implements ClientUI{
             if (params.length != 3) {
                 throw new ResponseException(400, "Please enter a piece to promote to.");
             } else {
-               promotionPiece = convertToPiece(params[3]).getPieceType();
+               promotionPiece = convertToPiece(params[2]).getPieceType();
             }
 
         }
@@ -183,4 +195,24 @@ public class GameplayUI implements ClientUI{
             case null -> null;
         };
     }
+
+    public boolean isPlaying() {
+        //TODO: FIx this
+        return true;
+    }
+    private int convertColCharToInt(Character c) throws ResponseException {
+        char cha = Character.toLowerCase(c);
+        return switch(cha) {
+            case 'a' -> 1;
+            case 'b' -> 2;
+            case 'c' -> 3;
+            case 'd' -> 4;
+            case 'e' -> 5;
+            case 'f' -> 6;
+            case 'g' -> 7;
+            case 'h' -> 8;
+            default -> throw new ResponseException(400, "Move failed. Incorrect column letter.");
+        };
+    }
+
 }
