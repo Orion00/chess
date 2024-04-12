@@ -1,6 +1,8 @@
 package server.websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataAccess.DBGameDAO;
@@ -103,6 +105,7 @@ public class WebSocketHandler {
                 throw new ResponseException(400, "You can't make a move for "+propGame.getGame().getBoard().getPiece(propMove.getStartPosition()).getTeamColor());
 
             }
+            ChessPiece propPieceMoving = propGame.getGame().getBoard().getPiece(propMove.getStartPosition());
             propGame.getGame().makeMove(propMove);
 
             // Make move in DB
@@ -114,6 +117,23 @@ public class WebSocketHandler {
             if (!propGame.equals(game)) {
                 throw new ResponseException(500, "Update for game failed in DB");
             }
+
+            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+            StringBuilder message = new StringBuilder();
+            message.append(userGameCommand.getUsername());
+            message.append(" has moved ");
+            message.append(propPieceMoving.toString());
+            message.append(" from ");
+            message.append(propMove.getStartPosition().prettyToString());
+            message.append(" to ");
+            message.append(propMove.getEndPosition().prettyToString());
+            if (propMove.getPromotionPiece() !=  null) {
+                message.append("(promoting to ");
+                message.append(propMove.getPromotionPiece().toString());
+                message.append(")");
+            }
+            notification.setMessage(message.toString());
+            connections.broadcast(game.gameID(), userGameCommand.getAuthString(), notification);
 
             LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
             loadGame.setGame(game.getGame());
@@ -129,12 +149,19 @@ public class WebSocketHandler {
     private void leave(UserGameCommand userGameCommandGen) throws IOException, DataAccessException {
         Leave userGameCommand = (Leave) userGameCommandGen;
         connections.remove(userGameCommand.getGameID(), userGameCommand.getAuthString());
-//        GameDAO gameDAO = new DBGameDAO();
-//        GameData game = gameDAO.getGame(userGameCommand.getGameID());
-//        userGameCommand.getUsername();
-//        game.blackUsername() = us
-//        gameDAO.updateGames(propGame);
-        var message = String.format("%s has left the game.", userGameCommand.getAuthString());
+        GameDAO gameDAO = new DBGameDAO();
+        GameData game = gameDAO.getGame(userGameCommand.getGameID());
+        GameData updatedGame = game;
+        if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
+            updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.getGame());
+        } else if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.BLACK) {
+            updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.getGame());
+        } else {
+            // Observer
+        }
+
+        gameDAO.updateGames(updatedGame);
+        var message = String.format("%s has left the game.", userGameCommand.getUsername());
         var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setMessage(message);
         connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);

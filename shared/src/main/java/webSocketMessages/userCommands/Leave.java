@@ -5,6 +5,16 @@ import chess.ChessGame;
 public class Leave extends UserGameCommand{
     private Integer gameID;
 
+    public ChessGame.TeamColor getPlayerColor() {
+        return playerColor;
+    }
+
+    public void setPlayerColor(ChessGame.TeamColor playerColor) {
+        this.playerColor = playerColor;
+    }
+
+    private ChessGame.TeamColor playerColor;
+
     public Integer getGameID() {
         return gameID;
     }
@@ -17,4 +27,5 @@ public class Leave extends UserGameCommand{
         super(authToken);
         this.commandType = CommandType.LEAVE;
     }
+
 }

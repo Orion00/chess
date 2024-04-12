@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import static ui.EscapeSequences.RESET_TEXT_COLOR;
+import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
+
 public class GameplayUI implements ClientUI{
     private final String serverUrl;
     private final ServerFacade server;
@@ -43,8 +46,8 @@ public class GameplayUI implements ClientUI{
             help - Display available commands
             print - Show your board
             move <START LOCATION> <END LOCATION> <PIECE TO PROMOTE TO>- Move selected piece
-            show - Show available moves for selected piece
-            leave - Return to previous window. Can resume later
+            show <PIECE LOCATION> - Show available moves for selected piece
+            leave - Lose your place in current game and can resume later. Return to previous window.
             resign - Surrender the game
             quit - Close the program
             """;
@@ -60,11 +63,38 @@ public class GameplayUI implements ClientUI{
                 case "quit" -> "quit";
                 case "print" -> print(params);
                 case "move" -> makeMove(currentAuthToken, params);
+                case "show" -> showMoves(params);
+                case "leave" -> leaveGame(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    private String leaveGame(String... params) throws ResponseException {
+        if (params.length > 0) {
+            throw new ResponseException(400, "Too many inputs entered");
+        }
+
+        ws.leaveGame(currentAuthToken, currentGameId, currentPlayerColor, currentUsername);
+        currentGameId = null;
+        currentPlayerColor = null;
+        currentGame = null;
+
+        return "You've left the game. Type 'help' to view available commands";
+    }
+
+    private String showMoves(String... params) throws ResponseException {
+        if (params.length > 1) {
+            throw new ResponseException(400, "Too many inputs entered");
+        }
+        // Convert from location to piece
+
+        // Show moves for that piece on current game
+
+        // printBoard using special print that takes in locations? In printing, if row and column are in pair, print different color
+        return "No functionality currently";
     }
 
     public ChessGame.TeamColor getCurrentPlayerColor() {
@@ -95,7 +125,9 @@ public class GameplayUI implements ClientUI{
 
     public void printAndUpdateBoard(ChessGame game) throws ResponseException {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        System.out.print("A move was made. Printing updated board.");
+        System.out.print(SET_TEXT_COLOR_BLUE);
+        System.out.print("Printing updated board.");
+        System.out.print(RESET_TEXT_COLOR);
         printBoard(game.getBoard());
         currentGame = game;
     }
@@ -174,7 +206,7 @@ public class GameplayUI implements ClientUI{
         }
 
 
-        return String.format("Move successful from %s to %s", startLocation, endLocation);
+        return String.format(SET_TEXT_COLOR_BLUE+"Move successful from %s to %s."+RESET_TEXT_COLOR, startLocation, endLocation);
     }
 
     private ChessPiece convertToPiece(String param) throws ResponseException {

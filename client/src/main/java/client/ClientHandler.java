@@ -36,7 +36,7 @@ public class ClientHandler implements  NotificationHandler {
                     gameplayUI.printAndUpdateBoard(userGameCommand.getGame());
                 }
                 case NOTIFICATION -> {
-                    System.out.println(SET_TEXT_COLOR_RED);
+                    System.out.println(SET_TEXT_COLOR_BLUE);
                     Notification userGameCommand = new Gson().fromJson(message, Notification.class);
                     System.out.print(userGameCommand.getMessage());
                 } case ERROR -> {
@@ -46,6 +46,7 @@ public class ClientHandler implements  NotificationHandler {
                 }
             }
         } catch (ResponseException i) {
+            System.out.println(SET_TEXT_COLOR_RED);
             System.out.print(i.getMessage());
         } finally {
             System.out.print(RESET_TEXT_COLOR);
@@ -113,8 +114,10 @@ public class ClientHandler implements  NotificationHandler {
                     System.out.print(result);
                 }
             } catch (Throwable e) {
+                System.out.println(SET_TEXT_COLOR_RED);
                 var msg = e.toString();
                 System.out.print(msg);
+                System.out.println(RESET_TEXT_COLOR);
             }
             }
             System.out.println();
