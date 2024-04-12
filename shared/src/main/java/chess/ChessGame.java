@@ -50,11 +50,11 @@ public class ChessGame {
      */
     public enum TeamColor {
         WHITE,
-        BLACK
+        BLACK,
     }
 
     public enum Winner {
-        WHITE, BLACK
+        WHITE, BLACK, NO
     }
 
     /**

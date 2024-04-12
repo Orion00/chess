@@ -5,9 +5,7 @@ import chess.ChessMove;
 import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
-import dataAccess.DBGameDAO;
-import dataAccess.DataAccessException;
-import dataAccess.GameDAO;
+import dataAccess.*;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -23,6 +21,7 @@ import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @WebSocket
 public class WebSocketHandler {
@@ -97,6 +96,17 @@ public class WebSocketHandler {
 
     private void joinPlayer(JoinPlayer userGameCommand, Session session) throws ResponseException {
         try {
+            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+            AuthDAO authDAO = new DBAuthDAO();
+            String trueUsername = authDAO.getAuthUser(new AuthData(userGameCommand.getAuthString(), null)).username();
+            if ((userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) &&
+                    (!Objects.equals(game.whiteUsername(), trueUsername)) ||
+            ((userGameCommand.getPlayerColor() == ChessGame.TeamColor.BLACK) &&
+                    (!Objects.equals(game.blackUsername(), trueUsername))))
+            {
+                throw new ResponseException(500, "You're not authorized to join.");
+            }
+
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
             var message = String.format("%s has joined the game as %s", userGameCommand.getUsername(), userGameCommand.getPlayerColor());
@@ -118,11 +128,32 @@ public class WebSocketHandler {
     }
 
     private void makeMove(MakeMove userGameCommand) throws ResponseException {
-
         try {
             // Validate move
             ChessMove propMove = userGameCommand.getMove();
             GameData propGame = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+
+            GameDAO gameDAO = new DBGameDAO();
+            ChessGame updatedGame = propGame.getGame();
+
+//            // Check for end of game conditions
+//            if (propGame.getGame().isInCheckmate(userGameCommand.getPlayerColor())) {
+//                if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
+//                    updatedGame.setWinner(ChessGame.Winner.BLACK);
+//                } else if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.BLACK) {
+//                    updatedGame.setWinner(ChessGame.Winner.WHITE);
+//                }
+//                gameDAO.updateGames(new GameData(propGame.gameID(), propGame.whiteUsername(), propGame.whiteUsername(), propGame.gameName(), updatedGame));
+//                String endGameMessage = String.format("%s team wins!", updatedGame.getWinner().toString());
+//                transmitGameEnd(endGameMessage, userGameCommand.getGameID());
+//                return;
+//            } else if (propGame.getGame().isInStalemate(userGameCommand.getPlayerColor())) {
+//                updatedGame.setWinner(ChessGame.Winner.NO);
+//                gameDAO.updateGames(new GameData(propGame.gameID(), propGame.whiteUsername(), propGame.whiteUsername(), propGame.gameName(), updatedGame));
+//                String endGameMessage = "Stalemate. It's a draw";
+//                transmitGameEnd(endGameMessage, userGameCommand.getGameID());
+//                return;
+//            }
 
             // Check if valid and correct team color is done in makeMove()
             // Changing turns is done in makeMove()
@@ -139,7 +170,6 @@ public class WebSocketHandler {
             propGame.getGame().makeMove(propMove);
 
             // Make move in DB
-            GameDAO gameDAO = new DBGameDAO();
             gameDAO.updateGames(propGame);
 
             // send and broadcast (or broadcast with null authtoken)
@@ -164,6 +194,19 @@ public class WebSocketHandler {
             }
             notification.setMessage(message.toString());
             connections.broadcast(game.gameID(), userGameCommand.getAuthString(), notification);
+
+            // Check for check
+//            ChessGame.TeamColor opposingTeam;
+//            if (userGameCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
+//                opposingTeam = ChessGame.TeamColor.BLACK;
+//            } else {
+//                opposingTeam = ChessGame.TeamColor.WHITE;
+//            }
+//            if (propGame.getGame().isInCheck(opposingTeam)) {
+//                Notification notification1 = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+//                notification1.setMessage(String.format("%s is in check.",opposingTeam.toString()));
+//                connections.broadcast(game.gameID(), null, notification1);
+//            }
 
             LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
             loadGame.setGame(game.getGame());
