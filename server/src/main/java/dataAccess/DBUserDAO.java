@@ -42,7 +42,6 @@ public class DBUserDAO implements UserDAO {
     public void createUser(UserData user) throws DataAccessException {
         if (user == null || user.username() == null || user.email() == null || user.password() == null
                 || user.username().isEmpty() || user.email().isEmpty() || user.password().isEmpty()) {
-            // TODO: Figure out if this is the right response
             // User is missing fields so we can't create it
             throw new DataAccessException("bad request");
         }
@@ -100,14 +99,18 @@ public class DBUserDAO implements UserDAO {
         };
 
         DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        for (var statement : createStatements) {
+            executeUpdate(statement);
         }
+//        executeUpdate(createStatements,null);
+//        try (var conn = DatabaseManager.getConnection()) {
+//            for (var statement : createStatements) {
+//                try (var preparedStatement = conn.prepareStatement(statement)) {
+//                    preparedStatement.executeUpdate();
+//                }
+//            }
+//        } catch (SQLException ex) {
+//            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+//        }
     }
 }

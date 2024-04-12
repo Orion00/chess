@@ -3,7 +3,6 @@ package dataAccess;
 import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
 import model.GameData;
 
 import java.sql.ResultSet;
@@ -124,6 +123,11 @@ public class DBGameDAO implements GameDAO {
             throw new DataAccessException("already taken");
         }
 
+        GameData updatedGame = createUpdatedGameData(username, clientColor, currentGame);
+        updateGames(updatedGame);
+    }
+
+    private static GameData createUpdatedGameData(String username, ChessGame.TeamColor clientColor, GameData currentGame) {
         GameData updatedGame;
         if (clientColor == ChessGame.TeamColor.WHITE) {
             updatedGame = new GameData(currentGame.gameID(), username, currentGame.blackUsername(), currentGame.gameName(), currentGame.game());
@@ -133,7 +137,7 @@ public class DBGameDAO implements GameDAO {
             // Observer
             updatedGame = currentGame;
         }
-        updateGames(updatedGame);
+        return updatedGame;
     }
 
     @Override
@@ -174,10 +178,14 @@ public class DBGameDAO implements GameDAO {
             try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof GameData p) ps.setString(i + 1, p.toString());
-                    else if (param == null) ps.setNull(i + 1, NULL);
+                    switch (param) {
+                        case String p -> ps.setString(i + 1, p);
+                        case Integer p -> ps.setInt(i + 1, p);
+                        case GameData p -> ps.setString(i + 1, p.toString());
+                        case null -> ps.setNull(i + 1, NULL);
+                        default -> {
+                        }
+                    }
                 }
                 ps.executeUpdate();
 
@@ -209,14 +217,8 @@ public class DBGameDAO implements GameDAO {
         };
 
         DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        for (var statement : createStatements) {
+            executeUpdate(statement);
         }
     }
 }

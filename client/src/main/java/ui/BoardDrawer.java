@@ -11,8 +11,6 @@ import static ui.EscapeSequences.*;
 
 public class BoardDrawer {
     private static final int BOARD_SIZE_IN_SQUARES = 8;
-    private static final int SQUARE_SIZE_IN_CHARS = 1;
-    private static final int LINE_WIDTH_IN_CHARS = 1;
     private static final String EMPTY = "   ";
     private static String playerColor;
 
@@ -164,12 +162,5 @@ public class BoardDrawer {
     private static void drawRowHeaders(PrintStream out, Integer row) throws ResponseException {
         String[] headers = new String[]{"1", "2", "3", "4", "5", "6", "7", "8"};
         drawHeader(out, headers[row]);
-    }
-
-    private static void setTextColor(PrintStream out,int r, int g, int b) {
-        out.printf("\u001B[38;2;%d;%d;%dm", r, g, b);
-    }
-    private static void setBackgroundColor(PrintStream out,int r, int g, int b) {
-        out.printf("\u001B[48;2;%d;%d;%dm", r, g, b);
     }
 }

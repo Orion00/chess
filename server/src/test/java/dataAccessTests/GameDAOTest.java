@@ -136,9 +136,19 @@ public class GameDAOTest {
         GameData actualGame = assertDoesNotThrow(() -> gameDAO.createGame(gameName));
         GameData actualGame2 = assertDoesNotThrow(() -> gameDAO.createGame(gameName2));
 
-        GameData expectedGame = new GameData(actualGame.gameID(), null,null,gameName,new ChessGame());
-        GameData expectedGame2 = new GameData(actualGame2.gameID(), null,null,gameName2,new ChessGame());
+        ChessBoard expectedBoard = new ChessBoard();
+        ChessBoard expectedBoard2 = new ChessBoard();
+        expectedBoard.resetBoard();
+        expectedBoard2.resetBoard();
+        ChessGame expectedG = new ChessGame();
+        ChessGame expectedG2 = new ChessGame();
+        expectedG.setBoard(expectedBoard);
+        expectedG2.setBoard(expectedBoard2);
+        GameData expectedGame = new GameData(actualGame.gameID(), null,null,gameName, expectedG);
+        GameData expectedGame2 = new GameData(actualGame2.gameID(), null,null,gameName2, expectedG2);
 
+//        expectedGame.getGame().getBoard().resetBoard();
+//        expectedGame2.getGame().getBoard().resetBoard();
         assertEquals(expectedGame, actualGame);
         assertEquals(expectedGame2, actualGame2);
     }

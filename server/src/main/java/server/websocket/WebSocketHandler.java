@@ -1,6 +1,5 @@
 package server.websocket;
 
-import chess.ChessGame;
 import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
@@ -23,22 +22,16 @@ import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 @WebSocket
 public class WebSocketHandler {
-    private final DatabaseService databaseService;
     private final GameService gameService;
-    private final UserService userService;
 
     private final ConnectionManager connections = new ConnectionManager();
 
-    public WebSocketHandler(DatabaseService databaseService, GameService gameService, UserService userService) {
-        this.databaseService = databaseService;
+    public WebSocketHandler(GameService gameService) {
         this.gameService = gameService;
-        this.userService = userService;
     }
 
     @OnWebSocketMessage
@@ -79,16 +72,15 @@ public class WebSocketHandler {
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
             var message = String.format("%s has joined the game as %s", userGameCommand.getUsername(), userGameCommand.getPlayerColor());
-            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
-            notification.setMessage(message);
-            // TODO: See if this works
-            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
-
-            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
-            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
-            loadGame.setGame(game.getGame());
-            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
-
+//            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+//            notification.setMessage(message);
+//            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
+//
+//            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+//            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+//            loadGame.setGame(game.getGame());
+//            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
+            sendInfoAboutNewParticipant(message, userGameCommand.getGameID(), userGameCommand.getAuthString());
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
         }
@@ -99,16 +91,15 @@ public class WebSocketHandler {
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
             var message = String.format("%s has started watching the game.", userGameCommand.getUsername());
-            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
-            notification.setMessage(message);
-            // TODO: See if this works
-            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
-
-            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
-            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
-            loadGame.setGame(game.getGame());
-            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
-            // TODO: Throw new type of exception that gets turned into ServerMessage.Error
+//            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+//            notification.setMessage(message);
+//            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
+//
+//            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
+//            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+//            loadGame.setGame(game.getGame());
+//            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
+            sendInfoAboutNewParticipant(message, userGameCommand.getGameID(), userGameCommand.getAuthString());
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
         }
@@ -157,7 +148,6 @@ public class WebSocketHandler {
 
     private void leave(UserGameCommand userGameCommandGen) throws IOException {
         Leave userGameCommand = (Leave) userGameCommandGen;
-        userGameCommand.setGameID(userGameCommand.getGameID()); //TODO: Figure out if this is necessary
         connections.remove(userGameCommand.getGameID(), userGameCommand.getAuthString());
         // TODO: Make a call to DAOs to get username
         var message = String.format("%s has left the game.", userGameCommand.getAuthString());
@@ -174,5 +164,15 @@ public class WebSocketHandler {
             }
         }
         throw new ResponseException(500, "GameID wasn't found");
+    }
+    private void sendInfoAboutNewParticipant(String broadcastMessage, Integer gameId, String auth) throws IOException, ResponseException, DataAccessException {
+        var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setMessage(broadcastMessage);
+        connections.broadcast(gameId,auth, notification);
+
+        GameData game = getGame(auth, gameId);
+        LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
+        loadGame.setGame(game.getGame());
+        connections.send(game.gameID(), auth, loadGame);
     }
 }
