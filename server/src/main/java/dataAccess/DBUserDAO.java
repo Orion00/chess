@@ -102,15 +102,5 @@ public class DBUserDAO implements UserDAO {
         for (var statement : createStatements) {
             executeUpdate(statement);
         }
-//        executeUpdate(createStatements,null);
-//        try (var conn = DatabaseManager.getConnection()) {
-//            for (var statement : createStatements) {
-//                try (var preparedStatement = conn.prepareStatement(statement)) {
-//                    preparedStatement.executeUpdate();
-//                }
-//            }
-//        } catch (SQLException ex) {
-//            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-//        }
     }
 }

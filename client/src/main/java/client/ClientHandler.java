@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebsocketFacade;
 import com.google.gson.Gson;
@@ -24,9 +23,6 @@ public class ClientHandler implements  NotificationHandler {
     private final PostloginUI postloginUI;
     private final GameplayUI gameplayUI;
     private String currentAuthToken;
-    private Integer currentGameID;
-    private ChessGame.TeamColor currentColor;
-    private String currentUsername;
 
     State state;
 
@@ -70,10 +66,6 @@ public class ClientHandler implements  NotificationHandler {
         postloginUI = new PostloginUI(url, server);
         gameplayUI = new GameplayUI(url, server);
         this.state = State.LOGGEDOUT;
-//        currentAuthToken = null;
-//        currentGameID = null;
-//        currentColor = null;
-//        currentUsername = null;
     }
 
     public void run() {
@@ -108,7 +100,6 @@ public class ClientHandler implements  NotificationHandler {
                     if (postloginUI.getCurrentGameId() != null) {
                         // Switch to GAME
                         state = State.GAME;
-                        currentGameID = postloginUI.getCurrentGameId();
                         handleJoinWebsocket(preloginUI.getAuthToken(), postloginUI.getCurrentGameId(), preloginUI.getCurrentUsername());
                         }
                 } else if (state.equals(State.GAME)) {
@@ -131,10 +122,6 @@ public class ClientHandler implements  NotificationHandler {
         System.out.println();
         System.out.print(">>> ");
     }
-
-//    private boolean isAuthorized() {
-//        return currentAuthToken != null;
-//    }
 
     private void handleJoinWebsocket(String currentAuthToken, Integer currentGameID, String currentUsername) throws ResponseException {
         WebsocketFacade ws = new WebsocketFacade(serverUrl, this);

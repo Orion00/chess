@@ -15,13 +15,13 @@ public class ConnectionManager {
         ConcurrentHashMap<String, Connection> innerMap = getInnerMap(gameId);
         if (innerMap == null) {
             //gameId doesn't exist yet
-            innerMap = new ConcurrentHashMap<String, Connection>();
+            innerMap = new ConcurrentHashMap<>();
         }
         innerMap.put(authToken, new Connection(authToken, session));
         connections.put(gameId, innerMap);
     }
 
-    public void remove(Integer gameId, String authToken) throws IOException {
+    public void remove(Integer gameId, String authToken) {
         ConcurrentHashMap<String, Connection> innerMap = getInnerMap(gameId);
         innerMap.remove(authToken);
 
@@ -65,11 +65,7 @@ public class ConnectionManager {
         }
     }
 
-    private ConcurrentHashMap<String, Connection> getInnerMap(Integer gameId) throws IOException {
-        ConcurrentHashMap<String, Connection> innerMap = connections.get(gameId);
-//        if (innerMap == null) {
-//            throw new IOException("gameID doesn't exist");
-//        }
-        return innerMap;
+    private ConcurrentHashMap<String, Connection> getInnerMap(Integer gameId) {
+        return connections.get(gameId);
     }
 }

@@ -25,11 +25,6 @@ public class MakeMove extends UserGameCommand {
 
     private ChessMove move;
     private String playerColor;
-
-//    public String getPlayerColor() {
-//        return playerColor;
-//    }
-
     public ChessGame.TeamColor getPlayerColor() throws ResponseException {
         return switch (playerColor) {
             case "WHITE" -> ChessGame.TeamColor.WHITE;

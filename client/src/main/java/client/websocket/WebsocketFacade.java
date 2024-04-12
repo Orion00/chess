@@ -40,25 +40,6 @@ public class WebsocketFacade extends Endpoint {
         }
     }
 
-    //TODO: Methods for each userGame command
-//    public void enterPetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.ENTER, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
-//    public void getGame(String auth,Integer gameId) throws ResponseException{
-//        try {
-//            UserGameCommand command = new UserGameCommand(auth, UserGameCommand.CommandType.GET_GAME, null, String.valueOf(gameId));
-//            this.session.getBasicRemote().sendText(new Gson().toJson(command));
-//        } catch (IOException i) {
-//            throw new ResponseException(500, i.getMessage());
-//        }
-//
-//    }
-
         public void joinPlayer(String auth,Integer gameId, ChessGame.TeamColor playerColor, String username) throws ResponseException{
         try {
             JoinPlayer command = new JoinPlayer(auth);

@@ -95,12 +95,7 @@ public class BoardDrawer {
             resetBGAndTextCol(out);
             out.println();
 
-//            if (boardRow < BOARD_SIZE_IN_SQUARES - 1) {
-//                drawVerticalLine(out);
-//                setBlack(out);
-//            }
         }
-//        out.println();
     }
 
 
@@ -143,15 +138,6 @@ public class BoardDrawer {
         out.print(SET_TEXT_COLOR_BLACK);
     }
 
-    private static void setFontSize(PrintStream out, Integer size) {
-        String SET_FONT_SIZE = "\u001B[" + size + "m";
-        out.print(SET_FONT_SIZE);
-    }
-
-    private static void resetFontSize(PrintStream out) {
-        String RESET_FONT_SIZE = "\033[0m";
-        out.print(RESET_FONT_SIZE);
-    }
 
 
     private static void resetBGAndTextCol(PrintStream out) {
