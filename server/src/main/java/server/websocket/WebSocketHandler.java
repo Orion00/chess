@@ -12,9 +12,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import service.DatabaseService;
 import service.GameService;
-import service.UserService;
 import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
@@ -58,9 +56,7 @@ public class WebSocketHandler {
                 }
 //                case RESIGN -> resign();
             }
-        } catch (IOException | ResponseException i) {
-//            throw new ResponseException(500, i.getMessage());
-            //TODO: Create error object
+        } catch (IOException | ResponseException | DataAccessException i) {
             Error error = new Error(ServerMessage.ServerMessageType.ERROR);
             error.setErrorMessage(i.getMessage());
             session.getRemote().sendString(error.toString());
@@ -72,14 +68,6 @@ public class WebSocketHandler {
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
             var message = String.format("%s has joined the game as %s", userGameCommand.getUsername(), userGameCommand.getPlayerColor());
-//            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
-//            notification.setMessage(message);
-//            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
-//
-//            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
-//            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
-//            loadGame.setGame(game.getGame());
-//            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
             sendInfoAboutNewParticipant(message, userGameCommand.getGameID(), userGameCommand.getAuthString());
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
@@ -91,14 +79,6 @@ public class WebSocketHandler {
             connections.add(userGameCommand.getGameID(), userGameCommand.getAuthString(), session);
 
             var message = String.format("%s has started watching the game.", userGameCommand.getUsername());
-//            var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
-//            notification.setMessage(message);
-//            connections.broadcast(userGameCommand.getGameID(),userGameCommand.getAuthString(), notification);
-//
-//            GameData game = getGame(userGameCommand.getAuthString(), userGameCommand.getGameID());
-//            LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME);
-//            loadGame.setGame(game.getGame());
-//            connections.send(game.gameID(), userGameCommand.getAuthString(), loadGame);
             sendInfoAboutNewParticipant(message, userGameCommand.getGameID(), userGameCommand.getAuthString());
         } catch (IOException | DataAccessException i) {
             throw new ResponseException(500, i.getMessage());
@@ -146,10 +126,14 @@ public class WebSocketHandler {
 
     }
 
-    private void leave(UserGameCommand userGameCommandGen) throws IOException {
+    private void leave(UserGameCommand userGameCommandGen) throws IOException, DataAccessException {
         Leave userGameCommand = (Leave) userGameCommandGen;
         connections.remove(userGameCommand.getGameID(), userGameCommand.getAuthString());
-        // TODO: Make a call to DAOs to get username
+//        GameDAO gameDAO = new DBGameDAO();
+//        GameData game = gameDAO.getGame(userGameCommand.getGameID());
+//        userGameCommand.getUsername();
+//        game.blackUsername() = us
+//        gameDAO.updateGames(propGame);
         var message = String.format("%s has left the game.", userGameCommand.getAuthString());
         var notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setMessage(message);

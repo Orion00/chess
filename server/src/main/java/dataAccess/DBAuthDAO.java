@@ -43,7 +43,6 @@ public class DBAuthDAO implements AuthDAO {
     public AuthData createAuth(UserData user) throws DataAccessException {
         if (user == null || user.username() == null || user.password() == null
             || user.username().isEmpty() || user.password().isEmpty()) {
-            // TODO: Figure out if this is the right message
             throw new DataAccessException("bad request");
         }
 
